@@ -1,7 +1,7 @@
 report_date,vehicle_id,vehicle_name,driver,distance_km,fuel_litres,fuel_cost_usd,maintenance_cost_usd,utilization_percent,trips_completed
-2026-07-01,TRK-9021,Alpha Hauler,M Johnson,642,94,141,85,91,4
-2026-07-02,VAN-405,City Sprinter,A Patel,388,48,72,0,84,6
-2026-07-03,TRK-8832,Beta Hauler,R Chen,716,112,168,240,78,3
-2026-07-04,SED-102,Exec Transport,J Lee,219,18,27,0,69,5
-2026-07-05,TRK-9021,Alpha Hauler,M Johnson,684,99,149,0,93,4
-2026-07-06,VAN-405,City Sprinter,A Patel,405,52,78,35,88,7
+2026-07-01,TRK-9021,Alpha Hauler,Manish Sharma,642,94,141,85,91,4
+2026-07-02,VAN-405,City Sprinter,Ananya Patel,388,48,72,0,84,6
+2026-07-03,TRK-8832,Beta Hauler,Rahul Mehta,716,112,168,240,78,3
+2026-07-04,SED-102,Exec Transport,Jatin Kumar,219,18,27,0,69,5
+2026-07-05,TRK-9021,Alpha Hauler,Manish Sharma,684,99,149,0,93,4
+2026-07-06,VAN-405,City Sprinter,Ananya Patel,405,52,78,35,88,7

@@ -233,9 +233,56 @@
     document.querySelectorAll('aside.sidebar .sidebar-footer > a.nav-item[href="settings.html"]').forEach(function (link) { link.parentElement.remove(); });
   }
 
+  function localizeDemoContent() {
+    const names = {
+      'Admin User': 'Aarav Sharma', 'M. Johnson': 'Manish Sharma', 'A. Patel': 'Ananya Patel', 'R. Chen': 'Rahul Mehta',
+      'A. Smith': 'Arjun Singh', 'R. Martinez': 'Riya Verma', 'S. Davis': 'Sneha Iyer', 'J. Doe': 'Jatin Kumar', 'S. Smith': 'Sakshi Rao'
+    };
+    const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT);
+    const nodes = [];
+    while (walker.nextNode()) nodes.push(walker.currentNode);
+    nodes.forEach(function (node) {
+      if (node.parentElement.closest('script, style, textarea')) return;
+      let text = node.nodeValue;
+      Object.keys(names).forEach(function (name) { text = text.split(name).join(names[name]); });
+      text = text.replace(/\$(\d[\d,]*(?:\.\d+)?)(k)?\b/g, function (_, rawAmount, suffix) {
+        const amount = Number(rawAmount.replace(/,/g, '')) * (suffix ? 1000 : 1) * 83;
+        return '₹' + amount.toLocaleString('en-IN', { maximumFractionDigits: 2 });
+      });
+      node.nodeValue = text;
+    });
+    document.querySelectorAll('input[placeholder]').forEach(function (input) {
+      input.placeholder = input.placeholder.replace(/\$/g, '₹');
+    });
+  }
+
+  function setupMotion() {
+    if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    const style = document.createElement('style');
+    style.textContent = '\n      .cursor-glow { position:fixed; width:260px; height:260px; border-radius:50%; pointer-events:none; z-index:9998; transform:translate(-50%,-50%); background:radial-gradient(circle, rgba(59,130,246,.13) 0%, rgba(59,130,246,.045) 35%, transparent 72%); transition:opacity .25s ease; }\n      .content > * { animation: transitops-enter .48s cubic-bezier(.2,.8,.2,1) both; }\n      .content > *:nth-child(2) { animation-delay:.06s; } .content > *:nth-child(3) { animation-delay:.12s; }\n      .card, .btn, .nav-item, .profile-btn { transition:transform .2s ease, box-shadow .2s ease, background-color .2s ease; }\n      .card:hover { transform:translateY(-3px); box-shadow:0 12px 26px rgba(15,23,42,.09); }\n      .btn:hover, .profile-btn:hover { transform:translateY(-2px) scale(1.01); }\n      .nav-item:hover { transform:translateX(3px); }\n      @keyframes transitops-enter { from { opacity:0; transform:translateY(10px); } to { opacity:1; transform:translateY(0); } }\n      @media (max-width: 700px) { .cursor-glow { display:none; } .card:hover, .btn:hover, .profile-btn:hover, .nav-item:hover { transform:none; } }\n    ';
+    document.head.appendChild(style);
+    const glow = document.createElement('div');
+    glow.className = 'cursor-glow';
+    glow.style.opacity = '0';
+    document.body.appendChild(glow);
+    let frame;
+    document.addEventListener('pointermove', function (event) {
+      cancelAnimationFrame(frame);
+      frame = requestAnimationFrame(function () {
+        glow.style.left = event.clientX + 'px';
+        glow.style.top = event.clientY + 'px';
+        glow.style.opacity = '1';
+      });
+    });
+    document.addEventListener('pointerleave', function () { glow.style.opacity = '0'; });
+  }
+
   function setupPage() {
     normalizeNavigation();
+    localizeDemoContent();
+    setTimeout(localizeDemoContent, 0);
     setupNavigation();
+    setupMotion();
     setupRecordForms();
     setupLegacyFilters();
     addRelatedLinks();
