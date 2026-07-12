@@ -1,0 +1,2300 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Vehicle Registry - TransitOps Fleet Management</title>
+  <!-- Google Fonts & Material Symbols -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet" />
+  
+  <style>
+    /* RESET & BASE */
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    body {
+      font-family: 'Inter', sans-serif;
+      background-color: #f8fafc;
+      color: #0f172a;
+      height: 100vh;
+      overflow: hidden;
+      display: flex;
+    }
+    
+    /* SCROLLBARS */
+    .custom-scrollbar::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-track {
+      background: transparent;
+    }
+    .custom-scrollbar::-webkit-scrollbar-thumb {
+      background: #cbd5e1;
+      border-radius: 4px;
+    }
+    .custom-scrollbar:hover::-webkit-scrollbar-thumb {
+      background: #94a3b8;
+    }
+
+    /* TOAST ALERTS */
+    #toast-container {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      z-index: 9999;
+      display: flex;
+      flex-direction: flex-col;
+      gap: 10px;
+    }
+    .toast {
+      background: #1e293b;
+      color: #ffffff;
+      padding: 12px 20px;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 500;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      transform: translateY(-20px);
+      opacity: 0;
+      animation: toastIn 0.3s forwards;
+      transition: opacity 0.3s, transform 0.3s;
+    }
+    @keyframes toastIn {
+      to {
+        transform: translateY(0);
+        opacity: 1;
+      }
+    }
+    .toast.success {
+      background-color: #059669;
+    }
+    .toast.info {
+      background-color: #2563eb;
+    }
+
+    /* LAYOUT PATTERN */
+    .app-container {
+      display: flex;
+      width: 100vw;
+      height: 100vh;
+      position: relative;
+    }
+
+    /* SIDEBAR (Left) */
+    .sidebar {
+      width: 250px;
+      background: #ffffff;
+      border-right: 1px solid #e2e8f0;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      padding: 24px 16px;
+      flex-shrink: 0;
+      z-index: 100;
+      transition: transform 0.3s ease;
+    }
+    .sidebar-logo {
+      margin-bottom: 32px;
+      padding-left: 8px;
+    }
+    .sidebar-logo h1 {
+      font-size: 20px;
+      font-weight: 700;
+      color: #0f172a;
+      line-height: 1.2;
+    }
+    .sidebar-logo p {
+      font-size: 9px;
+      font-weight: 700;
+      color: #94a3b8;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      margin-top: 2px;
+    }
+    .sidebar-nav {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      flex-grow: 1;
+      overflow-y: auto;
+    }
+    .nav-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 10px 12px;
+      border-radius: 8px;
+      text-decoration: none;
+      color: #475569;
+      font-size: 14px;
+      font-weight: 500;
+      transition: background 0.15s, color 0.15s;
+    }
+    .nav-item:hover {
+      background: #f1f5f9;
+      color: #0f172a;
+    }
+    .nav-item.active {
+      background: #eff6ff;
+      color: #2563eb;
+      font-weight: 600;
+    }
+    .nav-item .material-symbols-outlined {
+      font-size: 20px;
+    }
+    .sidebar-bottom {
+      border-top: 1px solid #f1f5f9;
+      padding-top: 16px;
+      margin-top: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .profile-card {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 8px;
+      border-radius: 8px;
+      cursor: pointer;
+      position: relative;
+      transition: background 0.15s;
+    }
+    .profile-card:hover {
+      background: #f1f5f9;
+    }
+    .profile-avatar {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background: #1e293b;
+      color: #ffffff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 13px;
+      font-weight: 700;
+    }
+    .profile-info {
+      flex: 1;
+      overflow: hidden;
+    }
+    .profile-name {
+      font-size: 13px;
+      font-weight: 600;
+      color: #0f172a;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .profile-role {
+      font-size: 11px;
+      color: #64748b;
+    }
+    .profile-menu {
+      position: absolute;
+      bottom: 56px;
+      left: 8px;
+      right: 8px;
+      background: #ffffff;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+      display: none;
+      flex-direction: column;
+      padding: 6px 0;
+      z-index: 120;
+    }
+    .profile-menu.show {
+      display: flex;
+    }
+    .profile-menu-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 8px 12px;
+      font-size: 13px;
+      color: #475569;
+      background: none;
+      border: none;
+      width: 100%;
+      text-align: left;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+    .profile-menu-item:hover {
+      background: #f1f5f9;
+      color: #0f172a;
+    }
+    .profile-menu-item.logout {
+      color: #ef4444;
+      border-top: 1px solid #f1f5f9;
+      margin-top: 4px;
+      padding-top: 10px;
+    }
+
+    /* MAIN VIEW CONTAINER */
+    .main-view {
+      display: flex;
+      flex-direction: column;
+      flex-grow: 1;
+      height: 100%;
+      overflow: hidden;
+    }
+
+    /* TOP HEADER */
+    .header {
+      height: 64px;
+      background: #ffffff;
+      border-bottom: 1px solid #e2e8f0;
+      padding: 0 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-shrink: 0;
+      z-index: 90;
+    }
+    .menu-trigger {
+      display: none;
+      background: none;
+      border: none;
+      cursor: pointer;
+      color: #475569;
+      margin-right: 12px;
+    }
+    .search-wrapper {
+      position: relative;
+      max-width: 360px;
+      width: 100%;
+    }
+    .search-icon {
+      position: absolute;
+      left: 14px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: #94a3b8;
+      font-size: 20px;
+      pointer-events: none;
+    }
+    .search-input {
+      width: 100%;
+      height: 38px;
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 9999px;
+      padding: 0 16px 0 42px;
+      font-size: 13px;
+      color: #0f172a;
+      outline: none;
+      transition: border-color 0.15s, box-shadow 0.15s, background-color 0.15s;
+    }
+    .search-input:focus {
+      border-color: #2563eb;
+      background-color: #ffffff;
+      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+    }
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .notif-button {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background: none;
+      border: none;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #475569;
+      cursor: pointer;
+      position: relative;
+      transition: background 0.15s;
+    }
+    .notif-button:hover {
+      background: #f1f5f9;
+      color: #0f172a;
+    }
+    .notif-dot {
+      position: absolute;
+      top: 6px;
+      right: 6px;
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #ef4444;
+      border: 2px solid #ffffff;
+    }
+    
+    /* NOTIFICATIONS PANEL */
+    .notif-panel {
+      position: absolute;
+      top: 56px;
+      right: 24px;
+      width: 320px;
+      background: #ffffff;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+      display: none;
+      flex-direction: column;
+      z-index: 150;
+      max-height: 400px;
+    }
+    .notif-panel.show {
+      display: flex;
+    }
+    .notif-header {
+      padding: 12px 16px;
+      border-bottom: 1px solid #f1f5f9;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .notif-header h4 {
+      font-size: 14px;
+      font-weight: 600;
+    }
+    .notif-clear {
+      font-size: 12px;
+      color: #2563eb;
+      background: none;
+      border: none;
+      cursor: pointer;
+      font-weight: 500;
+    }
+    .notif-clear:hover {
+      text-decoration: underline;
+    }
+    .notif-list {
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+    }
+    .notif-item {
+      padding: 12px 16px;
+      border-bottom: 1px solid #f1f5f9;
+      display: flex;
+      gap: 10px;
+      align-items: flex-start;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+    .notif-item:hover {
+      background: #f8fafc;
+    }
+    .notif-item.unread {
+      background: #f0f7ff;
+    }
+    .notif-item-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: #2563eb;
+      margin-top: 6px;
+      flex-shrink: 0;
+    }
+    .notif-item-content {
+      flex: 1;
+    }
+    .notif-item-text {
+      font-size: 12px;
+      color: #334155;
+      line-height: 1.4;
+    }
+    .notif-item-time {
+      font-size: 11px;
+      color: #94a3b8;
+      margin-top: 4px;
+    }
+
+    /* WORKSPACE CONTENT AREA */
+    .workspace-layout {
+      display: flex;
+      flex-grow: 1;
+      overflow: hidden;
+      position: relative;
+    }
+
+    /* LEFT/CENTER MAIN DATA VIEW */
+    .data-section {
+      flex: 1;
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      overflow-y: auto;
+      height: 100%;
+    }
+    .page-title-block {
+      margin-bottom: 24px;
+    }
+    .page-title-block h2 {
+      font-size: 28px;
+      font-weight: 700;
+      color: #0f172a;
+    }
+    .page-title-block p {
+      font-size: 14px;
+      color: #64748b;
+      margin-top: 4px;
+    }
+
+    /* FILTER BAR */
+    .filter-bar {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+      position: relative;
+    }
+    .filter-dropdown {
+      position: relative;
+    }
+    .filter-btn {
+      height: 38px;
+      background: #ffffff;
+      border: 1px solid #e2e8f0;
+      border-radius: 6px;
+      padding: 0 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 13px;
+      font-weight: 500;
+      color: #475569;
+      cursor: pointer;
+      transition: border-color 0.15s, background-color 0.15s;
+    }
+    .filter-btn:hover {
+      background: #f8fafc;
+      border-color: #cbd5e1;
+    }
+    .filter-btn.active {
+      border-color: #2563eb;
+      color: #2563eb;
+      background: #f0f7ff;
+    }
+    .filter-btn span.arrow {
+      font-size: 18px;
+      color: #94a3b8;
+    }
+    .filter-btn.active span.arrow {
+      color: #2563eb;
+    }
+    .dropdown-menu {
+      position: absolute;
+      top: 44px;
+      left: 0;
+      background: #ffffff;
+      border: 1px solid #e2e8f0;
+      border-radius: 6px;
+      box-shadow: 0 10px 20px rgba(0, 0, 0, 0.06);
+      width: 160px;
+      display: none;
+      flex-direction: column;
+      padding: 4px 0;
+      z-index: 130;
+    }
+    .dropdown-menu.show {
+      display: flex;
+    }
+    .dropdown-item {
+      padding: 8px 16px;
+      font-size: 13px;
+      color: #475569;
+      background: none;
+      border: none;
+      text-align: left;
+      cursor: pointer;
+      width: 100%;
+      transition: background 0.15s;
+    }
+    .dropdown-item:hover {
+      background: #f1f5f9;
+      color: #0f172a;
+    }
+    .dropdown-item.selected {
+      background: #eff6ff;
+      color: #2563eb;
+      font-weight: 600;
+    }
+
+    /* DATA TABLE */
+    .table-container {
+      background: #ffffff;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+      overflow: hidden;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
+      margin-bottom: 16px;
+    }
+    .data-table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: left;
+    }
+    .data-table th {
+      background: #f8fafc;
+      padding: 14px 16px;
+      font-size: 12px;
+      font-weight: 600;
+      color: #64748b;
+      border-bottom: 1px solid #e2e8f0;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    .data-table td {
+      padding: 16px;
+      font-size: 13px;
+      color: #334155;
+      border-bottom: 1px solid #e2e8f0;
+      vertical-align: middle;
+    }
+    .data-table tbody tr {
+      cursor: pointer;
+      transition: background 0.15s;
+      border-left: 3px solid transparent;
+    }
+    .data-table tbody tr:hover {
+      background: #f8fafc;
+    }
+    .data-table tbody tr.selected {
+      background: #eff6ff;
+      border-left-color: #2563eb;
+    }
+    .reg-number {
+      font-weight: 700;
+      color: #0f172a;
+    }
+    .vehicle-info {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+    .vehicle-name {
+      font-weight: 600;
+      color: #0f172a;
+    }
+    .vehicle-model {
+      font-size: 11px;
+      color: #64748b;
+    }
+    .table-footer {
+      padding: 14px 16px;
+      font-size: 12px;
+      color: #64748b;
+      background: #f8fafc;
+      border-top: 1px solid #e2e8f0;
+    }
+
+    /* INSPECTOR DETAILS PANEL (Right) */
+    .inspector {
+      width: 380px;
+      background: #ffffff;
+      border-left: 1px solid #e2e8f0;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      flex-shrink: 0;
+      position: relative;
+      transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), width 0.3s ease;
+      transform: translateX(0);
+      z-index: 80;
+    }
+    .inspector.hidden {
+      width: 0;
+      transform: translateX(100%);
+      border-left: none;
+    }
+    .inspector-handle {
+      width: 50px;
+      height: 4px;
+      background: #000000;
+      border-radius: 9999px;
+      margin: 12px auto 0 auto;
+      flex-shrink: 0;
+    }
+    .inspector-header {
+      padding: 16px 20px 12px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      flex-shrink: 0;
+    }
+    .inspector-badges {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 11px;
+      font-weight: 600;
+      padding: 4px 10px;
+      border-radius: 9999px;
+    }
+    .badge.reg-badge {
+      background: #eff6ff;
+      color: #2563eb;
+    }
+    .badge.status-badge {
+      background: #f1f5f9;
+      color: #475569;
+    }
+    .badge.status-badge.on-trip {
+      background: #eff6ff;
+      color: #2563eb;
+    }
+    .badge.status-badge.on-trip::before {
+      content: '';
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: #2563eb;
+    }
+    .badge.status-badge.available {
+      background: #ecfdf5;
+      color: #059669;
+    }
+    .badge.status-badge.available::before {
+      content: '';
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: #10b981;
+    }
+    .badge.status-badge.maintenance {
+      background: #fff7ed;
+      color: #d97706;
+    }
+    .badge.status-badge.maintenance::before {
+      content: '';
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: #f97316;
+    }
+    .inspector-close {
+      background: none;
+      border: none;
+      color: #94a3b8;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      transition: background 0.15s, color 0.15s;
+    }
+    .inspector-close:hover {
+      background: #f1f5f9;
+      color: #0f172a;
+    }
+    .inspector-title-section {
+      padding: 0 20px 16px 20px;
+      border-bottom: 1px solid #f1f5f9;
+      flex-shrink: 0;
+    }
+    .inspector-title-section h3 {
+      font-size: 20px;
+      font-weight: 700;
+      color: #0f172a;
+    }
+    .inspector-title-section p {
+      font-size: 12px;
+      color: #64748b;
+      margin-top: 4px;
+    }
+    .inspector-body {
+      flex: 1;
+      overflow-y: auto;
+      padding: 20px;
+    }
+
+    /* CARDS IN INSPECTOR */
+    .metric-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+    .metric-card {
+      background: #ffffff;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+      padding: 12px;
+      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.02);
+    }
+    .metric-label {
+      font-size: 10px;
+      font-weight: 600;
+      color: #64748b;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 4px;
+    }
+    .metric-value {
+      font-size: 16px;
+      font-weight: 700;
+      color: #0f172a;
+    }
+    .assignment-card {
+      background: #ffffff;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+      padding: 12px;
+      margin-bottom: 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.02);
+    }
+    .assignment-info {
+      flex: 1;
+    }
+    .assignment-label {
+      font-size: 10px;
+      font-weight: 600;
+      color: #64748b;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 4px;
+    }
+    .assignment-value {
+      font-size: 13px;
+      font-weight: 600;
+      color: #0f172a;
+    }
+    .assignment-icon {
+      color: #2563eb;
+      font-size: 20px;
+    }
+
+    /* TIMELINE */
+    .section-title {
+      font-size: 10px;
+      font-weight: 700;
+      color: #64748b;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      margin-bottom: 14px;
+    }
+    .timeline-container {
+      position: relative;
+      margin-bottom: 24px;
+      padding-left: 20px;
+    }
+    .timeline-line {
+      position: absolute;
+      left: 5px;
+      top: 6px;
+      bottom: 6px;
+      width: 2px;
+      background: #e2e8f0;
+    }
+    .timeline-item {
+      position: relative;
+      margin-bottom: 16px;
+    }
+    .timeline-item:last-child {
+      margin-bottom: 0;
+    }
+    .timeline-dot {
+      position: absolute;
+      left: -20px;
+      top: 4px;
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background: #94a3b8;
+      border: 2px solid #ffffff;
+      box-shadow: 0 0 0 2px #e2e8f0;
+    }
+    .timeline-dot.active-blue {
+      background: #2563eb;
+      box-shadow: 0 0 0 2px #dbeafe;
+    }
+    .timeline-dot.active-green {
+      background: #10b981;
+      box-shadow: 0 0 0 2px #d1fae5;
+    }
+    .timeline-dot.active-orange {
+      background: #f97316;
+      box-shadow: 0 0 0 2px #ffedd5;
+    }
+    .timeline-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      margin-bottom: 3px;
+    }
+    .timeline-event {
+      font-size: 13px;
+      font-weight: 600;
+      color: #0f172a;
+    }
+    .timeline-time {
+      font-size: 10px;
+      color: #94a3b8;
+      font-weight: 500;
+    }
+    .timeline-desc {
+      font-size: 12px;
+      color: #64748b;
+      line-height: 1.4;
+    }
+    .timeline-subbox {
+      margin-top: 8px;
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 6px;
+      padding: 8px 12px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 12px;
+    }
+    .timeline-subbox-text {
+      color: #334155;
+      font-weight: 500;
+    }
+    .timeline-subbox-link {
+      color: #2563eb;
+      font-weight: 600;
+      background: none;
+      border: none;
+      cursor: pointer;
+    }
+    .timeline-subbox-link:hover {
+      text-decoration: underline;
+    }
+
+    /* DOCUMENTS */
+    .document-card {
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+      padding: 12px;
+      display: flex;
+      gap: 12px;
+      margin-bottom: 12px;
+      transition: background 0.15s;
+    }
+    .document-card.interactive {
+      cursor: pointer;
+    }
+    .document-card.interactive:hover {
+      background: #f1f5f9;
+      border-color: #cbd5e1;
+    }
+    .document-icon-box {
+      width: 32px;
+      height: 32px;
+      border-radius: 6px;
+      background: #eff6ff;
+      color: #2563eb;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+    .document-icon-box span {
+      font-size: 18px;
+    }
+    .document-info {
+      flex: 1;
+    }
+    .document-name {
+      font-size: 13px;
+      font-weight: 600;
+      color: #0f172a;
+    }
+    .document-details {
+      font-size: 11px;
+      color: #64748b;
+      margin-top: 2px;
+    }
+    .document-chevron {
+      color: #94a3b8;
+      align-self: center;
+      font-size: 18px;
+    }
+    .document-sublist {
+      margin-top: 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .document-subitem {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 12px;
+    }
+    .document-subitem-label {
+      color: #475569;
+      font-weight: 500;
+    }
+    .status-badge-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 2px 8px;
+      border-radius: 9999px;
+      font-size: 11px;
+      font-weight: 600;
+    }
+    .status-badge-pill.valid {
+      background: #ecfdf5;
+      color: #047857;
+    }
+    .status-badge-pill.valid span {
+      font-size: 12px;
+    }
+    .status-badge-pill.warning {
+      background: #fff7ed;
+      color: #c2410c;
+    }
+    .status-badge-pill.warning span {
+      font-size: 12px;
+    }
+
+    /* MODAL POPUPS */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(15, 23, 42, 0.4);
+      backdrop-filter: blur(4px);
+      z-index: 1000;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+    }
+    .modal-overlay.show {
+      display: flex;
+    }
+    .modal {
+      background: #ffffff;
+      border-radius: 12px;
+      width: 100%;
+      max-width: 480px;
+      box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      animation: modalScale 0.25s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+    }
+    @keyframes modalScale {
+      from {
+        transform: scale(0.95);
+        opacity: 0;
+      }
+      to {
+        transform: scale(1);
+        opacity: 1;
+      }
+    }
+    .modal-header {
+      padding: 16px 20px;
+      border-bottom: 1px solid #e2e8f0;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .modal-header h3 {
+      font-size: 16px;
+      font-weight: 700;
+      color: #0f172a;
+    }
+    .modal-close {
+      background: none;
+      border: none;
+      color: #94a3b8;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      transition: background 0.15s;
+    }
+    .modal-close:hover {
+      background: #f1f5f9;
+      color: #0f172a;
+    }
+    .modal-body {
+      padding: 20px;
+      overflow-y: auto;
+      max-height: 350px;
+    }
+    .modal-footer {
+      padding: 12px 20px;
+      border-top: 1px solid #e2e8f0;
+      display: flex;
+      justify-content: flex-end;
+      background: #f8fafc;
+    }
+    .btn {
+      height: 36px;
+      padding: 0 16px;
+      font-size: 13px;
+      font-weight: 600;
+      border-radius: 6px;
+      border: none;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.15s, border-color 0.15s;
+    }
+    .btn-primary {
+      background: #2563eb;
+      color: #ffffff;
+    }
+    .btn-primary:hover {
+      background: #1d4ed8;
+    }
+    
+    /* MODAL CONTENT STYLES */
+    .modal-info-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      margin-bottom: 16px;
+    }
+    .modal-info-item {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    .modal-info-label {
+      font-size: 11px;
+      color: #64748b;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    .modal-info-value {
+      font-size: 13px;
+      color: #0f172a;
+      font-weight: 500;
+    }
+    .modal-checklist {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-top: 12px;
+    }
+    .modal-checklist-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 13px;
+      color: #334155;
+    }
+    .modal-checklist-item span.checked {
+      color: #10b981;
+      font-size: 18px;
+    }
+    .modal-checklist-item span.unchecked {
+      color: #cbd5e1;
+      font-size: 18px;
+    }
+    
+    /* FUEL LOGS TABLE */
+    .fuel-logs-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 12px;
+      text-align: left;
+    }
+    .fuel-logs-table th {
+      padding: 10px 8px;
+      background: #f1f5f9;
+      color: #475569;
+      font-weight: 600;
+      border-bottom: 1px solid #e2e8f0;
+    }
+    .fuel-logs-table td {
+      padding: 12px 8px;
+      color: #334155;
+      border-bottom: 1px solid #f1f5f9;
+    }
+
+    /* RESPONSIVE CSS */
+    @media (max-width: 1024px) {
+      .inspector {
+        position: absolute;
+        right: 0;
+        top: 0;
+        bottom: 0;
+        border-left: 1px solid #e2e8f0;
+        box-shadow: -5px 0 25px rgba(0,0,0,0.08);
+      }
+      .inspector.hidden {
+        width: 0;
+        transform: translateX(100%);
+      }
+    }
+    @media (max-width: 768px) {
+      .menu-trigger {
+        display: block;
+      }
+      .sidebar {
+        position: fixed;
+        left: 0;
+        top: 0;
+        bottom: 0;
+        transform: translateX(-100%);
+      }
+      .sidebar.open {
+        transform: translateX(0);
+      }
+      .sidebar-overlay {
+        position: fixed;
+        inset: 0;
+        background: rgba(15, 23, 42, 0.4);
+        z-index: 99;
+        display: none;
+      }
+      .sidebar-overlay.show {
+        display: block;
+      }
+      .inspector {
+        width: 100%;
+        max-width: 360px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- TOAST NOTIFICATION CONTAINER -->
+  <div id="toast-container"></div>
+
+  <!-- MODAL: WORK ORDER -->
+  <div class="modal-overlay" id="work-order-modal">
+    <div class="modal">
+      <div class="modal-header">
+        <h3 id="work-order-title">Work Order Ticket</h3>
+        <button class="modal-close" onclick="closeModal('work-order-modal')">
+          <span class="material-symbols-outlined">close</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div class="modal-info-grid">
+          <div class="modal-info-item">
+            <span class="modal-info-label">Ticket ID</span>
+            <span class="modal-info-value" id="wo-id">WO-4992</span>
+          </div>
+          <div class="modal-info-item">
+            <span class="modal-info-label">Asset</span>
+            <span class="modal-info-value" id="wo-asset">Alpha Hauler (TRK-9021)</span>
+          </div>
+          <div class="modal-info-item">
+            <span class="modal-info-label">Schedule Date</span>
+            <span class="modal-info-value" id="wo-date">Oct 22, 2026 09:00 AM</span>
+          </div>
+          <div class="modal-info-item">
+            <span class="modal-info-label">Type</span>
+            <span class="modal-info-value" id="wo-type">Scheduled Inspection</span>
+          </div>
+          <div class="modal-info-item">
+            <span class="modal-info-label">Status</span>
+            <span class="status-badge-pill valid" style="align-self: flex-start;" id="wo-status">
+              <span class="material-symbols-outlined">check_circle</span>Completed
+            </span>
+          </div>
+          <div class="modal-info-item">
+            <span class="modal-info-label">Assigned Shop</span>
+            <span class="modal-info-value" id="wo-shop">Downtown Fleet Services</span>
+          </div>
+        </div>
+        <div style="border-top: 1px solid #f1f5f9; padding-top: 16px;">
+          <span class="section-title">Completed Tasks</span>
+          <div class="modal-checklist" id="wo-tasks">
+            <div class="modal-checklist-item">
+              <span class="material-symbols-outlined checked">check_box</span>
+              <span>Engine diagnostic scan</span>
+            </div>
+            <div class="modal-checklist-item">
+              <span class="material-symbols-outlined checked">check_box</span>
+              <span>Fluid level checks (oil, coolant, brake)</span>
+            </div>
+            <div class="modal-checklist-item">
+              <span class="material-symbols-outlined checked">check_box</span>
+              <span>Tire rotation & alignment check</span>
+            </div>
+            <div class="modal-checklist-item">
+              <span class="material-symbols-outlined checked">check_box</span>
+              <span>Brake pad thickness inspection</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-primary" onclick="closeModal('work-order-modal')">Close Ticket</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: FUEL LOGS -->
+  <div class="modal-overlay" id="fuel-logs-modal">
+    <div class="modal" style="max-width: 520px;">
+      <div class="modal-header">
+        <h3 id="fuel-logs-title">Recent Fuel Logs - Alpha Hauler</h3>
+        <button class="modal-close" onclick="closeModal('fuel-logs-modal')">
+          <span class="material-symbols-outlined">close</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <table class="fuel-logs-table">
+          <thead>
+            <tr>
+              <th>Date</th>
+              <th>Driver</th>
+              <th>Gallons</th>
+              <th>Cost</th>
+              <th>Location</th>
+            </tr>
+          </thead>
+          <tbody id="fuel-logs-tbody">
+            <!-- Populated via Javascript -->
+          </tbody>
+        </table>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-primary" onclick="closeModal('fuel-logs-modal')">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: DOCUMENT STATUS -->
+  <div class="modal-overlay" id="doc-status-modal">
+    <div class="modal">
+      <div class="modal-header">
+        <h3 id="doc-status-title">Document Status Details</h3>
+        <button class="modal-close" onclick="closeModal('doc-status-modal')">
+          <span class="material-symbols-outlined">close</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div class="modal-info-grid">
+          <div class="modal-info-item">
+            <span class="modal-info-label">Document Name</span>
+            <span class="modal-info-value" id="doc-modal-name">Registration</span>
+          </div>
+          <div class="modal-info-item">
+            <span class="modal-info-label">Issuer</span>
+            <span class="modal-info-value" id="doc-modal-issuer">Department of Motor Vehicles</span>
+          </div>
+          <div class="modal-info-item">
+            <span class="modal-info-label">Effective Date</span>
+            <span class="modal-info-value" id="doc-modal-effective">Oct 01, 2025</span>
+          </div>
+          <div class="modal-info-item">
+            <span class="modal-info-label">Expiry Date</span>
+            <span class="modal-info-value" id="doc-modal-expiry">Sep 30, 2027</span>
+          </div>
+        </div>
+        <div style="border-top: 1px solid #f1f5f9; padding-top: 16px; display: flex; flex-direction: column; gap: 8px;">
+          <span class="modal-info-label">Status Details</span>
+          <p id="doc-modal-desc" style="font-size: 13px; color: #475569; line-height: 1.5;">This registration is valid for public roadways and is active until the expiry date listed above.</p>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-primary" onclick="closeModal('doc-status-modal')">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="app-container">
+
+    <!-- MOBILE SIDEBAR OVERLAY -->
+    <div class="sidebar-overlay" id="sidebar-overlay" onclick="toggleSidebar()"></div>
+
+    <!-- SIDEBAR -->
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-logo">
+        <h1>TransitOps</h1>
+        <p>Fleet Management</p>
+      </div>
+
+      <nav class="sidebar-nav">
+        <a href="dashboard.html" class="nav-item">
+          <span class="material-symbols-outlined">dashboard</span>
+          Dashboard
+        </a>
+        <a href="vehicle-registry.html" class="nav-item active">
+          <span class="material-symbols-outlined">local_shipping</span>
+          Vehicles
+        </a>
+        <a href="#" class="nav-item" onclick="triggerNavDevelopment('Drivers')">
+          <span class="material-symbols-outlined">person</span>
+          Drivers
+        </a>
+        <a href="#" class="nav-item" onclick="triggerNavDevelopment('Trips')">
+          <span class="material-symbols-outlined">route</span>
+          Trips
+        </a>
+        <a href="#" class="nav-item" onclick="triggerNavDevelopment('Maintenance')">
+          <span class="material-symbols-outlined">build</span>
+          Maintenance
+        </a>
+        <a href="#" class="nav-item" onclick="triggerNavDevelopment('Fuel/Expenses')">
+          <span class="material-symbols-outlined">local_gas_station</span>
+          Fuel/Expenses
+        </a>
+        <a href="#" class="nav-item" onclick="triggerNavDevelopment('Reports')">
+          <span class="material-symbols-outlined">bar_chart</span>
+          Reports
+        </a>
+      </nav>
+
+      <div class="sidebar-bottom">
+        <a href="#" class="nav-item" onclick="triggerNavDevelopment('Settings')">
+          <span class="material-symbols-outlined">settings</span>
+          Settings
+        </a>
+        
+        <div class="profile-card" onclick="toggleProfileMenu(event)">
+          <div class="profile-avatar">TO</div>
+          <div class="profile-info">
+            <div class="profile-name">Admin User</div>
+            <div class="profile-role">Fleet Manager</div>
+          </div>
+          <span class="material-symbols-outlined" style="color: #64748b; font-size: 18px;">unfold_more</span>
+
+          <!-- Dropdown menu -->
+          <div class="profile-menu" id="profile-menu">
+            <button class="profile-menu-item" onclick="triggerNavDevelopment('My Profile')">
+              <span class="material-symbols-outlined">account_circle</span>
+              My Profile
+            </button>
+            <button class="profile-menu-item" onclick="triggerNavDevelopment('System Settings')">
+              <span class="material-symbols-outlined">settings</span>
+              Settings
+            </button>
+            <button class="profile-menu-item logout" onclick="triggerLogout()">
+              <span class="material-symbols-outlined">logout</span>
+              Log Out
+            </button>
+          </div>
+        </div>
+      </div>
+    </aside>
+
+    <!-- MAIN VIEW -->
+    <div class="main-view">
+      
+      <!-- TOP HEADER -->
+      <header class="header">
+        <div style="display: flex; align-items: center; width: 100%;">
+          <button class="menu-trigger" onclick="toggleSidebar()">
+            <span class="material-symbols-outlined">menu</span>
+          </button>
+          
+          <div class="search-wrapper">
+            <span class="material-symbols-outlined search-icon">search</span>
+            <input 
+              type="text" 
+              class="search-input" 
+              placeholder="Search vehicles, VINs, or license plates..."
+              id="search-box"
+              oninput="handleSearch(this.value)"
+            >
+          </div>
+        </div>
+
+        <div class="header-actions">
+          <button class="notif-button" id="notif-bell" onclick="toggleNotifications(event)">
+            <span class="material-symbols-outlined">notifications</span>
+            <span class="notif-dot" id="notif-dot"></span>
+          </button>
+
+          <!-- Notifications panel -->
+          <div class="notif-panel" id="notif-panel">
+            <div class="notif-header">
+              <h4>Notifications</h4>
+              <button class="notif-clear" onclick="markAllNotificationsRead()">Mark all read</button>
+            </div>
+            <div class="notif-list custom-scrollbar" id="notifications-container">
+              <!-- Populated via Javascript -->
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <!-- CONTENT SPLIT VIEW -->
+      <div class="workspace-layout">
+        
+        <!-- LEFT/CENTER DATA SECTION -->
+        <main class="data-section custom-scrollbar">
+          
+          <!-- Page title block -->
+          <div class="page-title-block">
+            <h2>Vehicle Registry</h2>
+            <p>Manage and track your entire fleet inventory.</p>
+          </div>
+
+          <!-- Filters bar -->
+          <div class="filter-bar">
+            <!-- Type filter -->
+            <div class="filter-dropdown">
+              <button class="filter-btn" id="type-filter-btn" onclick="toggleDropdown('type-dropdown', event)">
+                <span id="type-filter-label">All Types</span>
+                <span class="material-symbols-outlined arrow">expand_more</span>
+              </button>
+              <div class="dropdown-menu" id="type-dropdown">
+                <button class="dropdown-item selected" onclick="selectFilter('type', 'All', 'All Types')">All Types</button>
+                <button class="dropdown-item" onclick="selectFilter('type', 'Heavy Duty', 'Heavy Duty')">Heavy Duty</button>
+                <button class="dropdown-item" onclick="selectFilter('type', 'Cargo Van', 'Cargo Van')">Cargo Van</button>
+                <button class="dropdown-item" onclick="selectFilter('type', 'Sedan', 'Sedan')">Sedan</button>
+              </div>
+            </div>
+
+            <!-- Status filter -->
+            <div class="filter-dropdown">
+              <button class="filter-btn" id="status-filter-btn" onclick="toggleDropdown('status-dropdown', event)">
+                <span id="status-filter-label">All Statuses</span>
+                <span class="material-symbols-outlined arrow">expand_more</span>
+              </button>
+              <div class="dropdown-menu" id="status-dropdown">
+                <button class="dropdown-item selected" onclick="selectFilter('status', 'All', 'All Statuses')">All Statuses</button>
+                <button class="dropdown-item" onclick="selectFilter('status', 'On Trip', 'On Trip')">On Trip</button>
+                <button class="dropdown-item" onclick="selectFilter('status', 'Available', 'Available')">Available</button>
+                <button class="dropdown-item" onclick="selectFilter('status', 'Maintenance', 'Maintenance')">Maintenance</button>
+              </div>
+            </div>
+
+            <!-- Region filter -->
+            <div class="filter-dropdown">
+              <button class="filter-btn" id="region-filter-btn" onclick="toggleDropdown('region-dropdown', event)">
+                <span id="region-filter-label">All Regions</span>
+                <span class="material-symbols-outlined arrow">expand_more</span>
+              </button>
+              <div class="dropdown-menu" id="region-dropdown">
+                <button class="dropdown-item selected" onclick="selectFilter('region', 'All', 'All Regions')">All Regions</button>
+                <button class="dropdown-item" onclick="selectFilter('region', 'North Zone', 'North Zone')">North Zone</button>
+                <button class="dropdown-item" onclick="selectFilter('region', 'South Zone', 'South Zone')">South Zone</button>
+                <button class="dropdown-item" onclick="selectFilter('region', 'East Zone', 'East Zone')">East Zone</button>
+                <button class="dropdown-item" onclick="selectFilter('region', 'West Zone', 'West Zone')">West Zone</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Table layout -->
+          <div class="table-container">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th style="width: 140px;">Reg. Number</th>
+                  <th>Name / Model</th>
+                  <th>Type</th>
+                  <th>Max Load</th>
+                  <th>Odometer</th>
+                </tr>
+              </thead>
+              <tbody id="vehicles-table-tbody">
+                <!-- Rendered dynamically -->
+              </tbody>
+            </table>
+            <div class="table-footer" id="table-footer-text">
+              Showing 1 to 4 of 128 vehicles
+            </div>
+          </div>
+
+        </main>
+
+        <!-- RIGHT VEHICLE INSPECTOR -->
+        <aside class="inspector" id="inspector-panel">
+          <div class="inspector-handle"></div>
+          
+          <div class="inspector-header">
+            <div class="inspector-badges" id="inspector-badges-container">
+              <!-- JS Populated -->
+            </div>
+            <button class="inspector-close" onclick="closeInspector()">
+              <span class="material-symbols-outlined">close</span>
+            </button>
+          </div>
+
+          <div class="inspector-title-section">
+            <h3 id="inspector-name">Alpha Hauler</h3>
+            <p id="inspector-model-details">Volvo FH16 • Heavy Duty Truck</p>
+          </div>
+
+          <div class="inspector-body custom-scrollbar">
+            
+            <!-- METRIC CARDS -->
+            <div class="metric-grid">
+              <div class="metric-card">
+                <div class="metric-label">Odometer</div>
+                <div class="metric-value" id="inspector-odometer">124,500 mi</div>
+              </div>
+              <div class="metric-card">
+                <div class="metric-label">Acquisition Cost</div>
+                <div class="metric-value" id="inspector-cost">$185,000</div>
+              </div>
+            </div>
+
+            <!-- ASSIGNMENT -->
+            <div class="assignment-card">
+              <div class="assignment-info">
+                <div class="assignment-label">Current Assignment</div>
+                <div class="assignment-value" id="inspector-assignment">Route #884 (Chicago -> Detroit)</div>
+              </div>
+              <span class="material-symbols-outlined assignment-icon">route</span>
+            </div>
+
+            <!-- LIFECYCLE TIMELINE -->
+            <div>
+              <div class="section-title">Lifecycle Timeline</div>
+              <div class="timeline-container">
+                <div class="timeline-line"></div>
+                <div id="inspector-timeline">
+                  <!-- Dynamic Timeline Items -->
+                </div>
+              </div>
+            </div>
+
+            <!-- RECORDS & DOCUMENTS -->
+            <div style="margin-top: 12px;">
+              <div class="section-title">Records & Documents</div>
+              
+              <!-- Fuel Logs Card -->
+              <div class="document-card interactive" onclick="openFuelLogsModal()">
+                <div class="document-icon-box">
+                  <span class="material-symbols-outlined">local_gas_station</span>
+                </div>
+                <div class="document-info">
+                  <div class="document-name">Recent Fuel Logs</div>
+                  <div class="document-details" id="inspector-fuel-subtitle">Last entry: 2 days ago (110 gal)</div>
+                </div>
+                <span class="material-symbols-outlined document-chevron">chevron_right</span>
+              </div>
+
+              <!-- Document Status -->
+              <div class="document-card">
+                <div class="document-icon-box">
+                  <span class="material-symbols-outlined">description</span>
+                </div>
+                <div class="document-info">
+                  <div class="document-name" style="margin-bottom: 8px;">Document Status</div>
+                  <div class="document-sublist" id="inspector-doc-list">
+                    <!-- Populated via JS -->
+                  </div>
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </aside>
+
+      </div>
+
+    </div>
+
+  </div>
+
+  <script>
+    // --- VEHICLES DATA DATABASE ---
+    const vehiclesData = [
+      {
+        regNumber: "TRK-9021",
+        name: "Alpha Hauler",
+        model: "Volvo FH16",
+        subtitle: "Volvo FH16 • Heavy Duty Truck",
+        type: "Heavy Duty",
+        maxLoad: "44,000 lbs",
+        odometer: "124,500 mi",
+        acquisitionCost: "$185,000",
+        currentAssignment: "Route #884 (Chicago -> Detroit)",
+        status: "On Trip",
+        region: "North Zone",
+        timeline: [
+          {
+            title: "On Trip",
+            time: "Today, 08:30 AM",
+            desc: "Departed origin facility. ETA to destination: 4h 15m.",
+            badgeClass: "active-blue"
+          },
+          {
+            title: "Assigned to Driver",
+            time: "Yesterday, 14:00",
+            desc: "Assigned to M. Johnson for upcoming freight run.",
+            badgeClass: "gray"
+          },
+          {
+            title: "Available",
+            time: "Oct 24, 10:15 AM",
+            desc: "Cleared from maintenance yard.",
+            badgeClass: "gray"
+          },
+          {
+            title: "Scheduled Maintenance",
+            time: "Oct 22, 09:00 AM",
+            desc: "Work Order #WO-4992",
+            badgeClass: "active-orange",
+            isWorkOrder: true,
+            workOrderId: "WO-4992"
+          }
+        ],
+        fuelLogs: [
+          { date: "2 days ago", driver: "M. Johnson", gallons: "110 gal", cost: "$385.00", location: "Exxon, Chicago" },
+          { date: "5 days ago", driver: "M. Johnson", gallons: "105 gal", cost: "$367.50", location: "Shell, Gary" },
+          { date: "9 days ago", driver: "M. Johnson", gallons: "112 gal", cost: "$392.00", location: "Pilot, Toledo" }
+        ],
+        fuelSummary: "Last entry: 2 days ago (110 gal)",
+        docs: [
+          { name: "Registration", status: "Valid (11 mos)", statusType: "valid", effective: "Oct 01, 2025", expiry: "Sep 30, 2027", issuer: "DMV Illinois" },
+          { name: "Insurance Policy", status: "Expires in 14 days", statusType: "warning", effective: "Nov 15, 2025", expiry: "Nov 14, 2026", issuer: "Allstate Fleet Division" }
+        ]
+      },
+      {
+        regNumber: "VAN-405",
+        name: "City Sprinter",
+        model: "MB Sprinter 2500",
+        subtitle: "MB Sprinter 2500 • Cargo Van",
+        type: "Cargo Van",
+        maxLoad: "3,800 lbs",
+        odometer: "45,210 mi",
+        acquisitionCost: "$45,000",
+        currentAssignment: "Route #204 (Downtown Loop Delivery)",
+        status: "Available",
+        region: "South Zone",
+        timeline: [
+          {
+            title: "Available",
+            time: "Today, 09:00 AM",
+            desc: "Ready for dispatch at South Hub.",
+            badgeClass: "active-green"
+          },
+          {
+            title: "Route Completed",
+            time: "Yesterday, 17:30",
+            desc: "Completed local deliveries. Total package count: 48.",
+            badgeClass: "gray"
+          },
+          {
+            title: "Inspected",
+            time: "Oct 25, 08:00 AM",
+            desc: "Weekly safety inspection passed.",
+            badgeClass: "gray"
+          }
+        ],
+        fuelLogs: [
+          { date: "1 day ago", driver: "A. Smith", gallons: "18 gal", cost: "$63.00", location: "BP, Indianapolis" },
+          { date: "4 days ago", driver: "A. Smith", gallons: "16 gal", cost: "$56.00", location: "Shell, Louisville" }
+        ],
+        fuelSummary: "Last entry: 1 day ago (18 gal)",
+        docs: [
+          { name: "Registration", status: "Valid (6 mos)", statusType: "valid", effective: "May 10, 2025", expiry: "May 09, 2027", issuer: "DMV Indiana" },
+          { name: "Insurance Policy", status: "Valid (9 mos)", statusType: "valid", effective: "Aug 01, 2025", expiry: "Jul 31, 2027", issuer: "Geico Commercial" }
+        ]
+      },
+      {
+        regNumber: "TRK-8832",
+        name: "Beta Hauler",
+        model: "Peterbilt 579",
+        subtitle: "Peterbilt 579 • Heavy Duty Truck",
+        type: "Heavy Duty",
+        maxLoad: "40,000 lbs",
+        odometer: "312,099 mi",
+        acquisitionCost: "$165,000",
+        currentAssignment: "Maintenance Yard Depot",
+        status: "Maintenance",
+        region: "West Zone",
+        timeline: [
+          {
+            title: "In Shop - Inspection",
+            time: "Today, 07:00 AM",
+            desc: "Brake line repairs and fluid flush.",
+            badgeClass: "active-orange",
+            isWorkOrder: true,
+            workOrderId: "WO-4812"
+          },
+          {
+            title: "Towed to Yard",
+            time: "Yesterday, 18:20",
+            desc: "Escorted due to hydraulic pressure warning.",
+            badgeClass: "gray"
+          },
+          {
+            title: "On Trip",
+            time: "Oct 23, 11:00 AM",
+            desc: "En route St. Louis. Load delivered successfully.",
+            badgeClass: "gray"
+          }
+        ],
+        fuelLogs: [
+          { date: "4 days ago", driver: "R. Martinez", gallons: "95 gal", cost: "$332.50", location: "Speedway, St. Louis" },
+          { date: "8 days ago", driver: "R. Martinez", gallons: "100 gal", cost: "$350.00", location: "Exxon, Effingham" }
+        ],
+        fuelSummary: "Last entry: 4 days ago (95 gal)",
+        docs: [
+          { name: "Registration", status: "Valid (2 mos)", statusType: "valid", effective: "Jan 15, 2025", expiry: "Sep 15, 2026", issuer: "DMV Missouri" },
+          { name: "Insurance Policy", status: "Valid (3 mos)", statusType: "valid", effective: "Oct 01, 2025", expiry: "Oct 01, 2026", issuer: "Progressive Fleet" }
+        ]
+      },
+      {
+        regNumber: "SED-102",
+        name: "Exec Transport",
+        model: "Toyota Camry Hybrid",
+        subtitle: "Toyota Camry Hybrid • Sedan",
+        type: "Sedan",
+        maxLoad: "1,000 lbs",
+        odometer: "89,400 mi",
+        acquisitionCost: "$32,000",
+        currentAssignment: "VIP Airport Transfer (O'Hare Airport)",
+        status: "On Trip",
+        region: "East Zone",
+        timeline: [
+          {
+            title: "On Trip",
+            time: "Today, 11:30 AM",
+            desc: "Transporting executive guest from HQ to Airport Terminal 3.",
+            badgeClass: "active-blue"
+          },
+          {
+            title: "Assigned to Driver",
+            time: "Today, 08:00 AM",
+            desc: "Assigned to S. Davis for executive transport duty.",
+            badgeClass: "gray"
+          },
+          {
+            title: "Available",
+            time: "Yesterday, 18:00",
+            desc: "Parked at corporate garage. Wash and interior detail completed.",
+            badgeClass: "gray"
+          }
+        ],
+        fuelLogs: [
+          { date: "3 days ago", driver: "S. Davis", gallons: "12 gal", cost: "$42.00", location: "Shell, Rosemont" },
+          { date: "7 days ago", driver: "S. Davis", gallons: "10 gal", cost: "$35.00", location: "BP, Chicago" }
+        ],
+        fuelSummary: "Last entry: 3 days ago (12 gal)",
+        docs: [
+          { name: "Registration", status: "Expires in 5 days", statusType: "warning", effective: "Jul 20, 2025", expiry: "Jul 17, 2026", issuer: "DMV Illinois" },
+          { name: "Insurance Policy", status: "Valid (12 mos)", statusType: "valid", effective: "Jun 01, 2026", expiry: "May 31, 2027", issuer: "Liberty Mutual" }
+        ]
+      }
+    ];
+
+    // --- MOCK NOTIFICATIONS ---
+    let notifications = [
+      { id: 1, text: "TRK-9021 (Alpha Hauler) departed Chicago Facility.", time: "10 mins ago", unread: true },
+      { id: 2, text: "Maintenance Ticket WO-4812 created for TRK-8832.", time: "1 hour ago", unread: true },
+      { id: 3, text: "Registration warning: SED-102 expires in 5 days.", time: "4 hours ago", unread: true },
+      { id: 4, text: "Insurance Policy updated for City Sprinter (VAN-405).", time: "1 day ago", unread: false }
+    ];
+
+    // --- MOCK WORK ORDERS ---
+    const workOrders = {
+      "WO-4992": {
+        id: "WO-4992",
+        asset: "Alpha Hauler (TRK-9021)",
+        date: "Oct 22, 2026 09:00 AM",
+        type: "Scheduled Inspection",
+        status: "Completed",
+        statusType: "valid",
+        shop: "Downtown Fleet Services",
+        tasks: [
+          { name: "Engine diagnostic scan", checked: true },
+          { name: "Fluid level checks (oil, coolant, brake)", checked: true },
+          { name: "Tire rotation & alignment check", checked: true },
+          { name: "Brake pad thickness inspection", checked: true }
+        ]
+      },
+      "WO-4812": {
+        id: "WO-4812",
+        asset: "Beta Hauler (TRK-8832)",
+        date: "Today, 07:00 AM",
+        type: "Hydraulic System Diagnostic",
+        status: "In Progress",
+        statusType: "warning",
+        shop: "West Gate Fleet Hub",
+        tasks: [
+          { name: "De-pressurize hydraulic chamber", checked: true },
+          { name: "Check hose connections for leaks", checked: true },
+          { name: "Replace seal ring on main cylinder", checked: false },
+          { name: "Pressure testing and certification", checked: false }
+        ]
+      }
+    };
+
+    // --- STATE VARIABLES ---
+    let selectedVehicleIndex = 0;
+    let searchQuery = "";
+    let activeFilters = {
+      type: "All",
+      status: "All",
+      region: "All"
+    };
+
+    // --- INITIALIZATION ---
+    window.addEventListener("DOMContentLoaded", () => {
+      renderTable();
+      renderInspector();
+      renderNotificationsList();
+      
+      // Close dropdowns on outside click
+      document.addEventListener("click", (e) => {
+        closeAllDropdowns(e.target);
+      });
+    });
+
+    // --- RENDER TABLE ROWS ---
+    function renderTable() {
+      const tbody = document.getElementById("vehicles-table-tbody");
+      tbody.innerHTML = "";
+
+      const filtered = vehiclesData.filter((v, index) => {
+        // Search Filter
+        const query = searchQuery.toLowerCase().trim();
+        const matchesSearch = !query || 
+          v.regNumber.toLowerCase().includes(query) ||
+          v.name.toLowerCase().includes(query) ||
+          v.model.toLowerCase().includes(query) ||
+          v.type.toLowerCase().includes(query);
+
+        // Dropdown Filters
+        const matchesType = activeFilters.type === "All" || v.type === activeFilters.type;
+        const matchesStatus = activeFilters.status === "All" || v.status === activeFilters.status;
+        const matchesRegion = activeFilters.region === "All" || v.region === activeFilters.region;
+
+        return matchesSearch && matchesType && matchesStatus && matchesRegion;
+      });
+
+      if (filtered.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="5" style="text-align: center; padding: 24px; color: #94a3b8;">No matching vehicles found.</td></tr>`;
+        document.getElementById("table-footer-text").textContent = "Showing 0 of 128 vehicles";
+        return;
+      }
+
+      filtered.forEach((v) => {
+        // Get absolute index in database
+        const originalIndex = vehiclesData.findIndex(original => original.regNumber === v.regNumber);
+        const isSelected = originalIndex === selectedVehicleIndex;
+
+        const tr = document.createElement("tr");
+        tr.className = isSelected ? "selected" : "";
+        tr.onclick = () => {
+          selectVehicle(originalIndex);
+        };
+
+        tr.innerHTML = `
+          <td><span class="reg-number">${v.regNumber}</span></td>
+          <td>
+            <div class="vehicle-info">
+              <span class="vehicle-name">${v.name}</span>
+              <span class="vehicle-model">${v.model}</span>
+            </div>
+          </td>
+          <td>${v.type}</td>
+          <td>${v.maxLoad}</td>
+          <td>${v.odometer}</td>
+        `;
+        tbody.appendChild(tr);
+      });
+
+      // Update footer pagination text matching count
+      document.getElementById("table-footer-text").textContent = `Showing 1 to ${filtered.length} of 128 vehicles`;
+    }
+
+    // --- RENDER INSPECTOR PANEL (Right) ---
+    function renderInspector() {
+      const vehicle = vehiclesData[selectedVehicleIndex];
+      if (!vehicle) return;
+
+      // Badges
+      const badgesContainer = document.getElementById("inspector-badges-container");
+      let statusClass = "on-trip";
+      if (vehicle.status === "Available") statusClass = "available";
+      if (vehicle.status === "Maintenance") statusClass = "maintenance";
+
+      badgesContainer.innerHTML = `
+        <span class="badge reg-badge">${vehicle.regNumber}</span>
+        <span class="badge status-badge ${statusClass}">${vehicle.status}</span>
+      `;
+
+      // Titles
+      document.getElementById("inspector-name").textContent = vehicle.name;
+      document.getElementById("inspector-model-details").textContent = vehicle.subtitle;
+
+      // Metrics
+      document.getElementById("inspector-odometer").textContent = vehicle.odometer;
+      document.getElementById("inspector-cost").textContent = vehicle.acquisitionCost;
+      document.getElementById("inspector-assignment").textContent = vehicle.currentAssignment;
+
+      // Fuel Log Subtitle
+      document.getElementById("inspector-fuel-subtitle").textContent = vehicle.fuelSummary;
+
+      // Timeline
+      const timelineContainer = document.getElementById("inspector-timeline");
+      timelineContainer.innerHTML = "";
+
+      vehicle.timeline.forEach((item) => {
+        const div = document.createElement("div");
+        div.className = "timeline-item";
+
+        let subboxHtml = "";
+        if (item.isWorkOrder) {
+          subboxHtml = `
+            <div class="timeline-subbox">
+              <span class="timeline-subbox-text">Work Order #${item.workOrderId}</span>
+              <button class="timeline-subbox-link" onclick="openWorkOrderModal('${item.workOrderId}')">View Ticket</button>
+            </div>
+          `;
+        }
+
+        div.innerHTML = `
+          <div class="timeline-dot ${item.badgeClass}"></div>
+          <div class="timeline-content">
+            <div class="timeline-header">
+              <span class="timeline-event">${item.title}</span>
+              <span class="timeline-time">${item.time}</span>
+            </div>
+            <div class="timeline-desc">${item.desc}</div>
+            ${subboxHtml}
+          </div>
+        `;
+        timelineContainer.appendChild(div);
+      });
+
+      // Documents List
+      const docListContainer = document.getElementById("inspector-doc-list");
+      docListContainer.innerHTML = "";
+      
+      vehicle.docs.forEach((doc, idx) => {
+        const div = document.createElement("div");
+        div.className = "document-subitem";
+        
+        let pillClass = doc.statusType === "valid" ? "valid" : "warning";
+        let iconName = doc.statusType === "valid" ? "check_circle" : "warning";
+
+        div.innerHTML = `
+          <span class="document-subitem-label">${doc.name}</span>
+          <span class="status-badge-pill ${pillClass}" style="cursor: pointer;" onclick="openDocModal(${idx})">
+            <span class="material-symbols-outlined">${iconName}</span>
+            ${doc.status}
+          </span>
+        `;
+        docListContainer.appendChild(div);
+      });
+    }
+
+    // --- SELECT VEHICLE ACTION ---
+    function selectVehicle(index) {
+      selectedVehicleIndex = index;
+      
+      // Update Table row selection styling
+      renderTable();
+      // Update inspector details
+      renderInspector();
+
+      // Open inspector panel with sliding animation
+      const inspector = document.getElementById("inspector-panel");
+      if (inspector.classList.contains("hidden")) {
+        inspector.classList.remove("hidden");
+        showToast(`Opened inspector for ${vehiclesData[index].name} (${vehiclesData[index].regNumber})`, "info");
+      }
+    }
+
+    // --- CLOSE INSPECTOR ---
+    function closeInspector() {
+      const inspector = document.getElementById("inspector-panel");
+      inspector.classList.add("hidden");
+      showToast("Inspector panel hidden", "info");
+    }
+
+    // --- TOAST ALERTS SYSTEM ---
+    function showToast(message, type = "success") {
+      const container = document.getElementById("toast-container");
+      const el = document.createElement("div");
+      el.className = `toast ${type}`;
+      
+      let icon = "info";
+      if (type === "success") icon = "check_circle";
+      if (type === "error") icon = "error";
+
+      el.innerHTML = `
+        <span class="material-symbols-outlined" style="font-size: 16px;">${icon}</span>
+        <span>${message}</span>
+      `;
+      container.appendChild(el);
+
+      setTimeout(() => {
+        el.style.opacity = "0";
+        el.style.transform = "translateY(-10px)";
+        setTimeout(() => el.remove(), 300);
+      }, 3000);
+    }
+
+    // --- SEARCH LOGIC ---
+    function handleSearch(val) {
+      searchQuery = val;
+      renderTable();
+    }
+
+    // --- DROPDOWN CONTROL ---
+    function toggleDropdown(id, e) {
+      e.stopPropagation();
+      const menu = document.getElementById(id);
+      const isVisible = menu.classList.contains("show");
+      
+      // Close others first
+      closeAllDropdowns();
+
+      if (!isVisible) {
+        menu.classList.add("show");
+      }
+    }
+
+    function closeAllDropdowns(clickedElement = null) {
+      const menus = document.querySelectorAll(".dropdown-menu");
+      menus.forEach(m => {
+        if (!clickedElement || !m.parentNode.contains(clickedElement)) {
+          m.classList.remove("show");
+        }
+      });
+      
+      // Profile menu too
+      const profileMenu = document.getElementById("profile-menu");
+      if (profileMenu && (!clickedElement || !clickedElement.closest(".profile-card"))) {
+        profileMenu.classList.remove("show");
+      }
+
+      // Notifications panel too
+      const notifPanel = document.getElementById("notif-panel");
+      if (notifPanel && (!clickedElement || !clickedElement.closest(".notif-button") && !clickedElement.closest(".notif-panel"))) {
+        notifPanel.classList.remove("show");
+      }
+    }
+
+    // --- FILTER SELECTION LOGIC ---
+    function selectFilter(filterName, value, labelText) {
+      activeFilters[filterName] = value;
+      
+      // Update label in HTML button
+      const btnLabel = document.getElementById(`${filterName}-filter-label`);
+      btnLabel.textContent = labelText;
+      
+      const filterBtn = document.getElementById(`${filterName}-filter-btn`);
+      if (value !== "All") {
+        filterBtn.classList.add("active");
+        showToast(`Filtered by ${filterName}: ${value}`, "success");
+      } else {
+        filterBtn.classList.remove("active");
+        showToast(`Cleared ${filterName} filter`, "info");
+      }
+
+      // Highlight selected dropdown option
+      const menu = document.getElementById(`${filterName}-dropdown`);
+      const items = menu.querySelectorAll(".dropdown-item");
+      items.forEach(item => {
+        if (item.textContent.trim() === labelText.trim()) {
+          item.classList.add("selected");
+        } else {
+          item.classList.remove("selected");
+        }
+      });
+
+      renderTable();
+    }
+
+    // --- PROFILE MENU TOGGLE ---
+    function toggleProfileMenu(e) {
+      e.stopPropagation();
+      const menu = document.getElementById("profile-menu");
+      menu.classList.toggle("show");
+    }
+
+    // --- NOTIFICATION DRAWER TOGGLE ---
+    function toggleNotifications(e) {
+      e.stopPropagation();
+      const panel = document.getElementById("notif-panel");
+      panel.classList.toggle("show");
+    }
+
+    function renderNotificationsList() {
+      const container = document.getElementById("notifications-container");
+      const dot = document.getElementById("notif-dot");
+      container.innerHTML = "";
+
+      const unreadCount = notifications.filter(n => n.unread).length;
+      if (unreadCount > 0) {
+        dot.style.display = "block";
+      } else {
+        dot.style.display = "none";
+      }
+
+      if (notifications.length === 0) {
+        container.innerHTML = `<div style="padding: 20px; text-align: center; color: #94a3b8; font-size: 12px;">No notifications.</div>`;
+        return;
+      }
+
+      notifications.forEach(n => {
+        const div = document.createElement("div");
+        div.className = `notif-item ${n.unread ? 'unread' : ''}`;
+        div.onclick = () => markNotificationAsRead(n.id);
+
+        div.innerHTML = `
+          <div class="notif-item-dot" style="${n.unread ? '' : 'visibility: hidden;'}"></div>
+          <div class="notif-item-content">
+            <div class="notif-item-text">${n.text}</div>
+            <div class="notif-item-time">${n.time}</div>
+          </div>
+        `;
+        container.appendChild(div);
+      });
+    }
+
+    function markNotificationAsRead(id) {
+      const notif = notifications.find(n => n.id === id);
+      if (notif && notif.unread) {
+        notif.unread = false;
+        showToast("Marked notification as read", "info");
+        renderNotificationsList();
+      }
+    }
+
+    function markAllNotificationsRead() {
+      notifications.forEach(n => n.unread = false);
+      showToast("All notifications marked as read", "success");
+      renderNotificationsList();
+    }
+
+    // --- SIDEBAR TOGGLE (MOBILE) ---
+    function toggleSidebar() {
+      const sidebar = document.getElementById("sidebar");
+      const overlay = document.getElementById("sidebar-overlay");
+      sidebar.classList.toggle("open");
+      overlay.classList.toggle("show");
+    }
+
+    // --- DEV BUTTON WARNINGS ---
+    function triggerNavDevelopment(moduleName) {
+      showToast(`"${moduleName}" is under development. Connecting routes...`, "info");
+    }
+
+    function triggerLogout() {
+      showToast("Logging out of TransitOps Command Center...", "error");
+      setTimeout(() => {
+        window.location.href = "dashboard.html";
+      }, 1000);
+    }
+
+    // --- MODAL HANDLING ---
+    function openModal(id) {
+      const overlay = document.getElementById(id);
+      overlay.classList.add("show");
+    }
+
+    function closeModal(id) {
+      const overlay = document.getElementById(id);
+      overlay.classList.remove("show");
+    }
+
+    // --- SPECIFIC MODAL TRIGGERS ---
+    function openWorkOrderModal(id) {
+      const order = workOrders[id];
+      if (!order) return;
+
+      document.getElementById("work-order-title").textContent = `Work Order: ${order.id}`;
+      document.getElementById("wo-id").textContent = order.id;
+      document.getElementById("wo-asset").textContent = order.asset;
+      document.getElementById("wo-date").textContent = order.date;
+      document.getElementById("wo-type").textContent = order.type;
+      document.getElementById("wo-shop").textContent = order.shop;
+
+      // Status pill
+      const statusPill = document.getElementById("wo-status");
+      statusPill.className = `status-badge-pill ${order.statusType === 'valid' ? 'valid' : 'warning'}`;
+      statusPill.innerHTML = `<span class="material-symbols-outlined">${order.statusType === 'valid' ? 'check_circle' : 'warning'}</span>${order.status}`;
+
+      // Task Checklist
+      const taskContainer = document.getElementById("wo-tasks");
+      taskContainer.innerHTML = "";
+      order.tasks.forEach(t => {
+        const item = document.createElement("div");
+        item.className = "modal-checklist-item";
+        const icon = t.checked ? "check_box" : "check_box_outline_blank";
+        const iconClass = t.checked ? "checked" : "unchecked";
+        
+        item.innerHTML = `
+          <span class="material-symbols-outlined ${iconClass}">${icon}</span>
+          <span>${t.name}</span>
+        `;
+        taskContainer.appendChild(item);
+      });
+
+      openModal("work-order-modal");
+      showToast(`Loaded details for Work Order ${id}`, "info");
+    }
+
+    function openFuelLogsModal() {
+      const vehicle = vehiclesData[selectedVehicleIndex];
+      if (!vehicle) return;
+
+      document.getElementById("fuel-logs-title").textContent = `Recent Fuel Logs - ${vehicle.name}`;
+      
+      const tbody = document.getElementById("fuel-logs-tbody");
+      tbody.innerHTML = "";
+
+      vehicle.fuelLogs.forEach(log => {
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+          <td>${log.date}</td>
+          <td>${log.driver}</td>
+          <td>${log.gallons}</td>
+          <td>${log.cost}</td>
+          <td>${log.location}</td>
+        `;
+        tbody.appendChild(tr);
+      });
+
+      openModal("fuel-logs-modal");
+      showToast(`Loaded fuel log history for ${vehicle.name}`, "info");
+    }
+
+    function openDocModal(docIndex) {
+      const vehicle = vehiclesData[selectedVehicleIndex];
+      if (!vehicle) return;
+
+      const doc = vehicle.docs[docIndex];
+      if (!doc) return;
+
+      document.getElementById("doc-status-title").textContent = `${doc.name} Details`;
+      document.getElementById("doc-modal-name").textContent = doc.name;
+      document.getElementById("doc-modal-issuer").textContent = doc.issuer;
+      document.getElementById("doc-modal-effective").textContent = doc.effective;
+      document.getElementById("doc-modal-expiry").textContent = doc.expiry;
+
+      let warningDesc = "";
+      if (doc.statusType === "warning") {
+        warningDesc = ` WARNING: This document is set to expire soon (${doc.status}). Action is required to renew this document before operations are impacted.`;
+      } else {
+        warningDesc = ` This document is currently active and fully valid. No immediate action is required at this time.`;
+      }
+      document.getElementById("doc-modal-desc").textContent = `This documentation is registered under ${vehicle.name} (${vehicle.regNumber}) by the ${doc.issuer}.` + warningDesc;
+
+      openModal("doc-status-modal");
+      showToast(`Loaded registration detail: ${doc.name}`, "info");
+    }
+  </script>
+</body>
+</html>

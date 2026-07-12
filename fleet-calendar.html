@@ -1,0 +1,1528 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Fleet Calendar - TransitOps Fleet Management</title>
+  <!-- Google Fonts & Material Symbols -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet" />
+  
+  <style>
+    /* RESET & BASE */
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    body {
+      font-family: 'Inter', sans-serif;
+      background-color: #f8fafc;
+      color: #0f172a;
+      height: 100vh;
+      overflow: hidden;
+      display: flex;
+    }
+    
+    /* SCROLLBARS */
+    .custom-scrollbar::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-track {
+      background: transparent;
+    }
+    .custom-scrollbar::-webkit-scrollbar-thumb {
+      background: #cbd5e1;
+      border-radius: 4px;
+    }
+    .custom-scrollbar:hover::-webkit-scrollbar-thumb {
+      background: #94a3b8;
+    }
+
+    /* TOAST ALERTS */
+    #toast-container {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      z-index: 9999;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .toast {
+      background: #1e293b;
+      color: #ffffff;
+      padding: 12px 20px;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 500;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      transform: translateY(-20px);
+      opacity: 0;
+      animation: toastIn 0.3s forwards;
+      transition: opacity 0.3s, transform 0.3s;
+    }
+    @keyframes toastIn {
+      to {
+        transform: translateY(0);
+        opacity: 1;
+      }
+    }
+    .toast.success { background-color: #059669; }
+    .toast.info { background-color: #2563eb; }
+
+    /* LAYOUT PATTERN */
+    .app-container {
+      display: flex;
+      width: 100vw;
+      height: 100vh;
+      position: relative;
+    }
+
+    /* SIDEBAR (Left) */
+    .sidebar {
+      width: 250px;
+      background: #ffffff;
+      border-right: 1px solid #e2e8f0;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      padding: 24px 16px;
+      flex-shrink: 0;
+      z-index: 100;
+      transition: transform 0.3s ease;
+    }
+    .sidebar-logo {
+      margin-bottom: 32px;
+      padding-left: 8px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .sidebar-logo-icon {
+      width: 32px;
+      height: 32px;
+      border-radius: 6px;
+      background: #0f172a;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #ffffff;
+    }
+    .sidebar-logo-icon span {
+      font-size: 20px;
+    }
+    .sidebar-logo-text h1 {
+      font-size: 16px;
+      font-weight: 700;
+      color: #0f172a;
+      line-height: 1.2;
+    }
+    .sidebar-logo-text p {
+      font-size: 10px;
+      font-weight: 500;
+      color: #64748b;
+      margin-top: 1px;
+    }
+    .sidebar-nav {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      flex-grow: 1;
+      overflow-y: auto;
+    }
+    .nav-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 10px 12px;
+      border-radius: 8px;
+      text-decoration: none;
+      color: #475569;
+      font-size: 14px;
+      font-weight: 500;
+      transition: background 0.15s, color 0.15s;
+    }
+    .nav-item:hover {
+      background: #f1f5f9;
+      color: #0f172a;
+    }
+    .nav-item.active {
+      background: #eff6ff;
+      color: #2563eb;
+      font-weight: 600;
+    }
+    .nav-item .material-symbols-outlined {
+      font-size: 20px;
+    }
+    .sidebar-bottom {
+      border-top: 1px solid #f1f5f9;
+      padding-top: 16px;
+      margin-top: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    /* MAIN VIEW CONTAINER */
+    .main-view {
+      display: flex;
+      flex-direction: column;
+      flex-grow: 1;
+      height: 100%;
+      overflow: hidden;
+    }
+
+    /* TOP HEADER */
+    .header {
+      height: 64px;
+      background: #ffffff;
+      border-bottom: 1px solid #e2e8f0;
+      padding: 0 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-shrink: 0;
+      z-index: 90;
+    }
+    .menu-trigger {
+      display: none;
+      background: none;
+      border: none;
+      cursor: pointer;
+      color: #475569;
+      margin-right: 12px;
+    }
+    .search-wrapper {
+      position: relative;
+      max-width: 360px;
+      width: 100%;
+    }
+    .search-icon {
+      position: absolute;
+      left: 14px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: #94a3b8;
+      font-size: 20px;
+      pointer-events: none;
+    }
+    .search-input {
+      width: 100%;
+      height: 38px;
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 9999px;
+      padding: 0 16px 0 42px;
+      font-size: 13px;
+      color: #0f172a;
+      outline: none;
+      transition: border-color 0.15s, box-shadow 0.15s, background-color 0.15s;
+    }
+    .search-input:focus {
+      border-color: #2563eb;
+      background-color: #ffffff;
+      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+    }
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+    .notif-button {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background: none;
+      border: none;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #475569;
+      cursor: pointer;
+      position: relative;
+      transition: background 0.15s;
+    }
+    .notif-button:hover {
+      background: #f1f5f9;
+      color: #0f172a;
+    }
+    .notif-dot {
+      position: absolute;
+      top: 6px;
+      right: 6px;
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #ef4444;
+      border: 2px solid #ffffff;
+    }
+    .header-divider {
+      width: 1px;
+      height: 24px;
+      background: #e2e8f0;
+    }
+    .header-user-profile {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .header-avatar {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      object-fit: cover;
+    }
+    .header-user-info {
+      display: flex;
+      flex-direction: column;
+    }
+    .header-username {
+      font-size: 12px;
+      font-weight: 600;
+      color: #0f172a;
+    }
+    .header-userrole {
+      font-size: 10px;
+      color: #64748b;
+    }
+    
+    /* NOTIFICATIONS PANEL */
+    .notif-panel {
+      position: absolute;
+      top: 56px;
+      right: 140px;
+      width: 300px;
+      background: #ffffff;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+      display: none;
+      flex-direction: column;
+      z-index: 150;
+      max-height: 400px;
+    }
+    .notif-panel.show {
+      display: flex;
+    }
+    .notif-header {
+      padding: 12px 16px;
+      border-bottom: 1px solid #f1f5f9;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .notif-header h4 {
+      font-size: 13px;
+      font-weight: 600;
+    }
+    .notif-clear {
+      font-size: 11px;
+      color: #2563eb;
+      background: none;
+      border: none;
+      cursor: pointer;
+    }
+    .notif-list {
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+    }
+    .notif-item {
+      padding: 12px 16px;
+      border-bottom: 1px solid #f1f5f9;
+      display: flex;
+      gap: 10px;
+      align-items: flex-start;
+      cursor: pointer;
+    }
+    .notif-item:hover {
+      background: #f8fafc;
+    }
+    .notif-item-text {
+      font-size: 11px;
+      color: #334155;
+      line-height: 1.4;
+    }
+
+    /* CALENDAR MAIN WORKSPACE */
+    .calendar-workspace {
+      flex: 1;
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      overflow-y: auto;
+    }
+    .calendar-title-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 24px;
+    }
+    .calendar-title-info h2 {
+      font-size: 24px;
+      font-weight: 700;
+      color: #0f172a;
+    }
+    .calendar-title-info p {
+      font-size: 13px;
+      color: #64748b;
+      margin-top: 4px;
+    }
+    
+    .calendar-actions-right {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .segmented-control {
+      display: flex;
+      background: #f1f5f9;
+      padding: 4px;
+      border-radius: 6px;
+      border: 1px solid #e2e8f0;
+    }
+    .segment-btn {
+      height: 30px;
+      padding: 0 16px;
+      font-size: 12px;
+      font-weight: 500;
+      color: #475569;
+      border: none;
+      background: none;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: background 0.15s, color 0.15s;
+    }
+    .segment-btn.active {
+      background: #ffffff;
+      color: #0f172a;
+      box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+    }
+    
+    /* BUTTONS */
+    .btn {
+      height: 38px;
+      padding: 0 16px;
+      font-size: 13px;
+      font-weight: 600;
+      border-radius: 6px;
+      border: none;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      transition: background 0.15s;
+    }
+    .btn-primary {
+      background: #0f172a;
+      color: #ffffff;
+    }
+    .btn-primary:hover {
+      background: #1e293b;
+    }
+
+    /* FILTERS PANEL */
+    .filters-panel {
+      background: #ffffff;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+      padding: 12px 16px;
+      display: flex;
+      align-items: center;
+      gap: 24px;
+      margin-bottom: 20px;
+      box-shadow: 0 1px 2px rgba(0,0,0,0.02);
+      flex-wrap: wrap;
+    }
+    .filters-title {
+      font-size: 11px;
+      font-weight: 700;
+      color: #64748b;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .filter-checkbox-label {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 13px;
+      font-weight: 500;
+      color: #475569;
+      cursor: pointer;
+    }
+    .filter-checkbox {
+      width: 16px;
+      height: 16px;
+      accent-color: #2563eb;
+    }
+    .color-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      display: inline-block;
+    }
+    .color-dot.blue { background-color: #2563eb; }
+    .color-dot.orange { background-color: #f97316; }
+    .color-dot.purple { background-color: #93c5fd; }
+    .color-dot.pink { background-color: #fbcfe8; }
+
+    /* LAYOUT: SPLIT */
+    .calendar-split {
+      display: grid;
+      grid-template-columns: 2.2fr 1fr;
+      gap: 20px;
+      align-items: start;
+    }
+
+    /* CALENDAR CONTAINER */
+    .calendar-card {
+      background: #ffffff;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.02);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+    .calendar-card-header {
+      padding: 16px 20px;
+      border-bottom: 1px solid #e2e8f0;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .calendar-month-title {
+      font-size: 16px;
+      font-weight: 700;
+      color: #0f172a;
+    }
+    .calendar-nav-btns {
+      display: flex;
+      gap: 6px;
+    }
+    .cal-nav-btn {
+      width: 32px;
+      height: 32px;
+      border-radius: 6px;
+      border: 1px solid #e2e8f0;
+      background: #ffffff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #475569;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+    .cal-nav-btn:hover {
+      background: #f8fafc;
+    }
+
+    /* GRID */
+    .calendar-grid {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      background: #ffffff;
+    }
+    .day-header {
+      text-align: center;
+      padding: 10px 0;
+      font-size: 12px;
+      font-weight: 600;
+      color: #64748b;
+      border-bottom: 1px solid #e2e8f0;
+      background: #f8fafc;
+    }
+    .day-cell {
+      min-height: 120px;
+      border-right: 1px solid #e2e8f0;
+      border-bottom: 1px solid #e2e8f0;
+      padding: 6px;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      background: #ffffff;
+      position: relative;
+    }
+    .day-cell:nth-child(7n) {
+      border-right: none;
+    }
+    .day-number {
+      font-size: 12px;
+      font-weight: 600;
+      color: #64748b;
+      align-self: flex-end;
+      margin-bottom: 6px;
+    }
+    .day-cell.selected {
+      outline: 2px solid #2563eb;
+      outline-offset: -2px;
+      z-index: 10;
+    }
+    .day-cell.selected .day-number {
+      color: #2563eb;
+    }
+    .day-cell.other-month {
+      background-color: #f8fafc;
+    }
+    .day-cell.other-month .day-number {
+      color: #cbd5e1;
+    }
+
+    /* EVENT PILLS */
+    .event-pill {
+      font-size: 11px;
+      font-weight: 600;
+      padding: 4px 8px;
+      border-radius: 4px;
+      cursor: pointer;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      transition: transform 0.15s;
+    }
+    .event-pill:hover {
+      transform: translateY(-1px);
+      filter: brightness(0.95);
+    }
+    .event-pill.blue { background-color: #eff6ff; color: #2563eb; }
+    .event-pill.orange { background-color: #fff7ed; color: #ea580c; }
+    .event-pill.purple { background-color: #eff6ff; color: #1e3a8a; border: 1px dashed #bfdbfe; }
+    .event-pill.pink { background-color: #fce7f3; color: #9d174d; }
+
+    /* RIGHT COLUMN CARDS */
+    .right-card {
+      background: #ffffff;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.02);
+      padding: 20px;
+      margin-bottom: 20px;
+    }
+    .right-card:last-child {
+      margin-bottom: 0;
+    }
+    .right-card-title {
+      font-size: 14px;
+      font-weight: 700;
+      color: #0f172a;
+      margin-bottom: 16px;
+    }
+    
+    /* QUICK ACTIONS */
+    .quick-actions-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+    .action-btn {
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+      padding: 16px 12px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
+      cursor: pointer;
+      transition: background 0.15s, border-color 0.15s;
+    }
+    .action-btn:hover {
+      background: #f1f5f9;
+      border-color: #cbd5e1;
+    }
+    .action-btn span.icon {
+      font-size: 24px;
+    }
+    .action-btn span.icon.blue { color: #2563eb; }
+    .action-btn span.icon.black { color: #0f172a; }
+    .action-btn span.text {
+      font-size: 12px;
+      font-weight: 600;
+      color: #334155;
+    }
+
+    /* UPCOMING LIST */
+    .upcoming-list {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+    .upcoming-item {
+      display: flex;
+      gap: 12px;
+      align-items: flex-start;
+      cursor: pointer;
+      padding: 6px;
+      border-radius: 6px;
+      transition: background 0.15s;
+    }
+    .upcoming-item:hover {
+      background: #f8fafc;
+    }
+    .upcoming-icon-box {
+      width: 32px;
+      height: 32px;
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+    .upcoming-icon-box.pink { background-color: #fce7f3; color: #9d174d; }
+    .upcoming-icon-box.purple { background-color: #eff6ff; color: #1e3a8a; }
+    .upcoming-icon-box.blue { background-color: #eff6ff; color: #2563eb; }
+    .upcoming-icon-box span {
+      font-size: 18px;
+    }
+    
+    .upcoming-info {
+      flex: 1;
+    }
+    .upcoming-item-title {
+      font-size: 13px;
+      font-weight: 600;
+      color: #0f172a;
+    }
+    .upcoming-item-desc {
+      font-size: 11px;
+      color: #64748b;
+      margin-top: 1px;
+    }
+    .upcoming-item-due {
+      font-size: 11px;
+      color: #ef4444;
+      font-weight: 500;
+      margin-top: 2px;
+    }
+
+    /* MODAL POPUPS */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(15, 23, 42, 0.4);
+      backdrop-filter: blur(4px);
+      z-index: 1000;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+    }
+    .modal-overlay.show {
+      display: flex;
+    }
+    .modal {
+      background: #ffffff;
+      border-radius: 12px;
+      width: 100%;
+      max-width: 440px;
+      box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      animation: modalScale 0.25s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+    }
+    @keyframes modalScale {
+      from { transform: scale(0.95); opacity: 0; }
+      to { transform: scale(1); opacity: 1; }
+    }
+    .modal-header {
+      padding: 16px 20px;
+      border-bottom: 1px solid #e2e8f0;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .modal-header h3 {
+      font-size: 16px;
+      font-weight: 700;
+      color: #0f172a;
+    }
+    .modal-close {
+      background: none;
+      border: none;
+      color: #94a3b8;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      transition: background 0.15s;
+    }
+    .modal-close:hover {
+      background: #f1f5f9;
+      color: #0f172a;
+    }
+    .modal-body {
+      padding: 20px;
+    }
+    .modal-footer {
+      padding: 12px 20px;
+      border-top: 1px solid #e2e8f0;
+      display: flex;
+      justify-content: flex-end;
+      gap: 8px;
+      background: #f8fafc;
+    }
+    
+    /* FORM INPUTS */
+    .form-group {
+      margin-bottom: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    .form-label {
+      font-size: 11px;
+      font-weight: 600;
+      color: #64748b;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    .form-input, .form-select {
+      width: 100%;
+      padding: 8px 12px;
+      font-size: 13px;
+      border: 1px solid #e2e8f0;
+      border-radius: 6px;
+      outline: none;
+      font-family: inherit;
+    }
+    .form-input:focus, .form-select:focus {
+      border-color: #2563eb;
+      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+    }
+    
+    .btn-secondary {
+      background: #ffffff;
+      border: 1px solid #e2e8f0;
+      color: #475569;
+      font-weight: 600;
+    }
+    .btn-secondary:hover {
+      background: #f8fafc;
+    }
+    .btn-save {
+      background: #2563eb;
+      color: #ffffff;
+      font-weight: 600;
+    }
+    .btn-save:hover {
+      background: #1d4ed8;
+    }
+
+    /* RESPONSIVE */
+    @media (max-width: 1024px) {
+      .calendar-split {
+        grid-template-columns: 1fr;
+      }
+    }
+    @media (max-width: 768px) {
+      .menu-trigger {
+        display: block;
+      }
+      .sidebar {
+        position: fixed;
+        left: 0;
+        top: 0;
+        bottom: 0;
+        transform: translateX(-100%);
+      }
+      .sidebar.open {
+        transform: translateX(0);
+      }
+      .sidebar-overlay {
+        position: fixed;
+        inset: 0;
+        background: rgba(15, 23, 42, 0.4);
+        z-index: 99;
+        display: none;
+      }
+      .sidebar-overlay.show {
+        display: block;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- TOAST NOTIFICATION CONTAINER -->
+  <div id="toast-container"></div>
+
+  <!-- MODAL: NEW EVENT -->
+  <div class="modal-overlay" id="new-event-modal">
+    <div class="modal">
+      <form id="new-event-form" onsubmit="handleNewEvent(event)">
+        <div class="modal-header">
+          <h3>Create New Event</h3>
+          <button type="button" class="modal-close" onclick="closeModal('new-event-modal')">
+            <span class="material-symbols-outlined">close</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          <div class="form-group">
+            <label class="form-label" for="event-title">Title</label>
+            <input type="text" class="form-input" id="event-title" placeholder="e.g. TR-1055 (LAX)" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="event-day">Day of October</label>
+            <input type="number" class="form-input" id="event-day" min="1" max="31" value="12" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="event-type">Category</label>
+            <select class="form-select" id="event-type">
+              <option value="blue">Scheduled Trip (Blue)</option>
+              <option value="orange">Maintenance (Orange)</option>
+              <option value="purple">Driver Leave (Light Blue/Purple)</option>
+              <option value="pink">License Expiry (Pink)</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="event-desc">Description</label>
+            <input type="text" class="form-input" id="event-desc" placeholder="e.g. Driver: M. Jones. Route: Boston loop.">
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" onclick="closeModal('new-event-modal')">Cancel</button>
+          <button type="submit" class="btn btn-save">Create Event</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL: QUICK ACTIONS FOR LOG REPAIR / ASSIGN TRIP -->
+  <div class="modal-overlay" id="quick-action-modal">
+    <div class="modal">
+      <form id="quick-action-form" onsubmit="handleQuickActionSave(event)">
+        <div class="modal-header">
+          <h3 id="quick-action-modal-title">Log Fleet Event</h3>
+          <button type="button" class="modal-close" onclick="closeModal('quick-action-modal')">
+            <span class="material-symbols-outlined">close</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          <div class="form-group">
+            <label class="form-label" for="qa-asset">Vehicle / Driver ID</label>
+            <input type="text" class="form-input" id="qa-asset" placeholder="e.g. TRK-9021" required>
+          </div>
+          <div class="form-group" id="qa-route-group">
+            <label class="form-label" for="qa-detail">Route / Task Detail</label>
+            <input type="text" class="form-input" id="qa-detail" placeholder="e.g. Route #884 en route to Detroit">
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" onclick="closeModal('quick-action-modal')">Cancel</button>
+          <button type="submit" class="btn btn-save">Confirm</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL: EVENT DETAILS -->
+  <div class="modal-overlay" id="details-modal">
+    <div class="modal">
+      <div class="modal-header">
+        <h3>Calendar Item Detail</h3>
+        <button class="modal-close" onclick="closeModal('details-modal')">
+          <span class="material-symbols-outlined">close</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label class="form-label">Subject</label>
+          <p id="details-subject" style="font-size: 14px; font-weight: 700; color: #0f172a;"></p>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Description</label>
+          <p id="details-desc" style="font-size: 13px; color: #475569; line-height: 1.4;"></p>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-primary" onclick="closeModal('details-modal')">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="app-container">
+
+    <!-- MOBILE SIDEBAR OVERLAY -->
+    <div class="sidebar-overlay" id="sidebar-overlay" onclick="toggleSidebar()"></div>
+
+    <!-- SIDEBAR -->
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-logo">
+        <div class="sidebar-logo-icon">
+          <span class="material-symbols-outlined">local_shipping</span>
+        </div>
+        <div class="sidebar-logo-text">
+          <h1>TransitOps</h1>
+          <p>Fleet Management</p>
+        </div>
+      </div>
+
+      <nav class="sidebar-nav">
+        <a href="dashboard.html" class="nav-item">
+          <span class="material-symbols-outlined">dashboard</span>
+          Dashboard
+        </a>
+        <a href="vehicle-registry.html" class="nav-item">
+          <span class="material-symbols-outlined">local_shipping</span>
+          Vehicles
+        </a>
+        <a href="#" class="nav-item" onclick="triggerNavDevelopment('Drivers')">
+          <span class="material-symbols-outlined">person</span>
+          Drivers
+        </a>
+        <a href="#" class="nav-item" onclick="triggerNavDevelopment('Trips')">
+          <span class="material-symbols-outlined">route</span>
+          Trips
+        </a>
+        <a href="#" class="nav-item" onclick="triggerNavDevelopment('Maintenance')">
+          <span class="material-symbols-outlined">build</span>
+          Maintenance
+        </a>
+        <a href="#" class="nav-item" onclick="triggerNavDevelopment('Fuel/Expenses')">
+          <span class="material-symbols-outlined">local_gas_station</span>
+          Fuel/Expenses
+        </a>
+        <a href="#" class="nav-item" onclick="triggerNavDevelopment('Reports')">
+          <span class="material-symbols-outlined">bar_chart</span>
+          Reports
+        </a>
+        <a href="fleet-calendar.html" class="nav-item active">
+          <span class="material-symbols-outlined">calendar_today</span>
+          Calendar
+        </a>
+        <a href="fleet-documents.html" class="nav-item">
+          <span class="material-symbols-outlined">description</span>
+          Documents
+        </a>
+      </nav>
+
+      <div class="sidebar-bottom">
+        <a href="#" class="nav-item" onclick="triggerNavDevelopment('Settings')">
+          <span class="material-symbols-outlined">settings</span>
+          Settings
+        </a>
+      </div>
+    </aside>
+
+    <!-- MAIN VIEW -->
+    <div class="main-view">
+      
+      <!-- TOP HEADER -->
+      <header class="header">
+        <div style="display: flex; align-items: center; width: 100%;">
+          <button class="menu-trigger" onclick="toggleSidebar()">
+            <span class="material-symbols-outlined">menu</span>
+          </button>
+          
+          <div class="search-wrapper">
+            <span class="material-symbols-outlined search-icon">search</span>
+            <input 
+              type="text" 
+              class="search-input" 
+              placeholder="Search trips, vehicles, or drivers..."
+              id="search-box"
+              oninput="handleSearch(this.value)"
+            >
+          </div>
+        </div>
+
+        <div class="header-actions">
+          <button class="notif-button" id="notif-bell" onclick="toggleNotifications(event)">
+            <span class="material-symbols-outlined">notifications</span>
+            <span class="notif-dot" id="notif-dot"></span>
+          </button>
+
+          <!-- Notifications panel -->
+          <div class="notif-panel" id="notif-panel">
+            <div class="notif-header">
+              <h4>Notifications</h4>
+              <button class="notif-clear" onclick="markAllNotificationsRead()">Mark all read</button>
+            </div>
+            <div class="notif-list custom-scrollbar" id="notifications-container">
+              <!-- Populated via Javascript -->
+            </div>
+          </div>
+
+          <div class="header-divider"></div>
+
+          <div class="header-user-profile" style="cursor: pointer;" onclick="triggerLogout()">
+            <img 
+              alt="User avatar" 
+              class="header-avatar" 
+              src="https://lh3.googleusercontent.com/aida-public/AB6AXuDTu7H7bjM1-TANNlJst9JmkZFG0YdSnIhaLCui21I-J9R635iCjK3AFrUyIbn5Rl9UyK2POQajHzXQMsAUqaLnDRnFyqeyBSGYtfi1slflZ6vaOsfHBPpzAPs3U1rF8PeB8p9jjtRvCaDbhYjwFEB76tk3aM0TxiTTgp1rCQ0qYUeoE7hFSQunQhY_CBpCO49IWfPwvSavwT5OzGK3r-sZjsptTdVO7unZLcj1l2DF_38XWXoiF08O"
+            />
+            <div class="header-user-info">
+              <span class="header-username">J. Doe</span>
+              <span class="header-userrole">Dispatcher</span>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <!-- CALENDAR CONTENT -->
+      <div class="calendar-workspace custom-scrollbar">
+        
+        <div class="calendar-title-row">
+          <div class="calendar-title-info">
+            <h2>Fleet Calendar</h2>
+            <p>Manage schedules, maintenance, and personnel availability.</p>
+          </div>
+          <div class="calendar-actions-right">
+            <div class="segmented-control">
+              <button class="segment-btn active" onclick="switchView('Month', this)">Month</button>
+              <button class="segment-btn" onclick="switchView('Week', this)">Week</button>
+              <button class="segment-btn" onclick="switchView('Day', this)">Day</button>
+            </div>
+            <button class="btn btn-primary" onclick="openModal('new-event-modal')">
+              <span class="material-symbols-outlined" style="font-size: 18px; font-weight: bold;">add</span>
+              New Event
+            </button>
+          </div>
+        </div>
+
+        <!-- FILTERS PANEL -->
+        <section class="filters-panel">
+          <span class="filters-title">
+            <span class="material-symbols-outlined" style="font-size: 16px;">filter_alt</span>
+            Filters
+          </span>
+          <label class="filter-checkbox-label">
+            <input type="checkbox" class="filter-checkbox" checked id="filter-trips" onchange="toggleFilterState()">
+            <span class="color-dot blue"></span> Scheduled Trips
+          </label>
+          <label class="filter-checkbox-label">
+            <input type="checkbox" class="filter-checkbox" checked id="filter-maint" onchange="toggleFilterState()">
+            <span class="color-dot orange"></span> Maintenance
+          </label>
+          <label class="filter-checkbox-label">
+            <input type="checkbox" class="filter-checkbox" checked id="filter-leave" onchange="toggleFilterState()">
+            <span class="color-dot purple"></span> Driver Leave
+          </label>
+          <label class="filter-checkbox-label">
+            <input type="checkbox" class="filter-checkbox" checked id="filter-expiry" onchange="toggleFilterState()">
+            <span class="color-dot pink"></span> License Expiry
+          </label>
+        </section>
+
+        <!-- SPLIT GRID -->
+        <div class="calendar-split">
+          
+          <!-- CALENDAR VIEW -->
+          <div class="calendar-card">
+            <div class="calendar-card-header">
+              <span class="calendar-month-title" id="calendar-month-header">October 2023</span>
+              <div class="calendar-nav-btns">
+                <button class="cal-nav-btn" onclick="navigateCalendar(-1)"><span class="material-symbols-outlined" style="font-size: 18px;">chevron_left</span></button>
+                <button class="cal-nav-btn" onclick="navigateCalendar(1)"><span class="material-symbols-outlined" style="font-size: 18px;">chevron_right</span></button>
+              </div>
+            </div>
+            
+            <div class="calendar-grid">
+              <!-- Week headers -->
+              <div class="day-header">Sun</div>
+              <div class="day-header">Mon</div>
+              <div class="day-header">Tue</div>
+              <div class="day-header">Wed</div>
+              <div class="day-header">Thu</div>
+              <div class="day-header">Fri</div>
+              <div class="day-header">Sat</div>
+              
+              <!-- Month grid cells -->
+              <!-- Row 1 -->
+              <div class="day-cell other-month"><span class="day-number">24</span></div>
+              <div class="day-cell other-month"><span class="day-number">25</span></div>
+              <div class="day-cell other-month"><span class="day-number">26</span></div>
+              <div class="day-cell other-month"><span class="day-number">27</span></div>
+              <div class="day-cell other-month"><span class="day-number">28</span></div>
+              <div class="day-cell other-month"><span class="day-number">29</span></div>
+              <div class="day-cell other-month"><span class="day-number">30</span></div>
+              
+              <!-- Row 2 -->
+              <div class="day-cell"><span class="day-number">1</span></div>
+              <div class="day-cell"><span class="day-number">2</span></div>
+              <div class="day-cell"><span class="day-number">3</span></div>
+              <div class="day-cell" id="cell-4">
+                <span class="day-number">4</span>
+                <!-- Events rendered dynamically -->
+              </div>
+              <div class="day-cell"><span class="day-number">5</span></div>
+              <div class="day-cell" id="cell-6">
+                <span class="day-number">6</span>
+              </div>
+              <div class="day-cell"><span class="day-number">7</span></div>
+
+              <!-- Row 3 -->
+              <div class="day-cell"><span class="day-number">8</span></div>
+              <div class="day-cell" id="cell-9">
+                <span class="day-number">9</span>
+              </div>
+              <div class="day-cell" id="cell-10">
+                <span class="day-number">10</span>
+              </div>
+              <div class="day-cell"><span class="day-number">11</span></div>
+              <div class="day-cell selected" id="cell-12">
+                <span class="day-number">12</span>
+              </div>
+              <div class="day-cell" id="cell-13">
+                <span class="day-number">13</span>
+              </div>
+              <div class="day-cell"><span class="day-number">14</span></div>
+            </div>
+          </div>
+
+          <!-- RIGHT SIDEBAR (Quick Actions & Upcoming Today) -->
+          <div>
+            <!-- Quick Actions -->
+            <div class="right-card">
+              <div class="right-card-title">Quick Actions</div>
+              <div class="quick-actions-grid">
+                <div class="action-btn" onclick="openQuickAction('Assign Trip')">
+                  <span class="material-symbols-outlined icon blue">route</span>
+                  <span class="text">Assign Trip</span>
+                </div>
+                <div class="action-btn" onclick="openQuickAction('Log Repair')">
+                  <span class="material-symbols-outlined icon black">build</span>
+                  <span class="text">Log Repair</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Upcoming Today -->
+            <div class="right-card">
+              <div class="right-card-title">Upcoming Today (12th)</div>
+              <div class="upcoming-list" id="upcoming-list-container">
+                <!-- Rendered dynamically -->
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+
+    </div>
+
+  </div>
+
+  <script>
+    // --- DATABASE ---
+    let calendarEvents = [
+      { id: 1, day: 4, type: "purple", title: "Leave: D. Vance", desc: "Driver Vance: PTO Leave approved." },
+      { id: 2, day: 6, type: "blue", title: "TR-1042 (ORD)", desc: "Scheduled Trip Chicago O'Hare. Driver: R. Carter." },
+      { id: 3, day: 9, type: "orange", title: "Maint: Veh-12", desc: "Scheduled 100k inspection at main depot." },
+      { id: 4, day: 10, type: "blue", title: "TR-1045 (LAX)", desc: "Scheduled Trip Los Angeles. Driver: A. Smith." },
+      { id: 5, day: 10, type: "blue", title: "TR-1046 (DFW)", desc: "Scheduled Trip Dallas Fort-Worth. Driver: S. Miller." },
+      { id: 6, day: 12, type: "pink", title: "Exp: CDL Class A", desc: "Commercial Driver License Renewal: M. Jones. CDL expires today." },
+      { id: 7, day: 12, type: "purple", title: "Leave: A. Baker", desc: "Driver Baker: PTO Leave approved." },
+      { id: 8, day: 13, type: "blue", title: "TR-1050 (BOS)", desc: "Scheduled Trip Boston Logan. Driver: K. Howard." }
+    ];
+
+    let notifications = [
+      { id: 1, text: "Driver License Expiry Alert: M. Jones." },
+      { id: 2, text: "Leave request submitted by A. Baker." }
+    ];
+
+    // --- INITIALIZATION ---
+    window.addEventListener("DOMContentLoaded", () => {
+      renderEvents();
+      renderNotificationsList();
+      
+      // Close dropdowns on click
+      document.addEventListener("click", (e) => {
+        const notifPanel = document.getElementById("notif-panel");
+        if (notifPanel && !e.target.closest(".notif-button") && !e.target.closest(".notif-panel")) {
+          notifPanel.classList.remove("show");
+        }
+      });
+    });
+
+    // --- TOAST NOTIFICATIONS ---
+    function showToast(message, type = "success") {
+      const container = document.getElementById("toast-container");
+      const el = document.createElement("div");
+      el.className = `toast ${type}`;
+      
+      let icon = "info";
+      if (type === "success") icon = "check_circle";
+      if (type === "error") icon = "error";
+
+      el.innerHTML = `
+        <span class="material-symbols-outlined" style="font-size: 16px;">${icon}</span>
+        <span>${message}</span>
+      `;
+      container.appendChild(el);
+
+      setTimeout(() => {
+        el.style.opacity = "0";
+        el.style.transform = "translateY(-10px)";
+        setTimeout(() => el.remove(), 300);
+      }, 3000);
+    }
+
+    // --- RENDER EVENTS IN CALENDAR & SIDEBAR ---
+    function renderEvents() {
+      // Clear cells
+      const cellsToClear = [4, 6, 9, 10, 12, 13];
+      cellsToClear.forEach(day => {
+        const cell = document.getElementById(`cell-${day}`);
+        // Remove existing pills
+        const existingPills = cell.querySelectorAll(".event-pill");
+        existingPills.forEach(p => p.remove());
+      });
+
+      // Filter settings
+      const showTrips = document.getElementById("filter-trips").checked;
+      const showMaint = document.getElementById("filter-maint").checked;
+      const showLeave = document.getElementById("filter-leave").checked;
+      const showExpiry = document.getElementById("filter-expiry").checked;
+
+      // Filter array
+      const filtered = calendarEvents.filter(e => {
+        if (e.type === "blue" && !showTrips) return false;
+        if (e.type === "orange" && !showMaint) return false;
+        if (e.type === "purple" && !showLeave) return false;
+        if (e.type === "pink" && !showExpiry) return false;
+        return true;
+      });
+
+      // Render calendar grid pills
+      filtered.forEach(e => {
+        const cell = document.getElementById(`cell-${e.day}`);
+        if (cell) {
+          const pill = document.createElement("div");
+          pill.className = `event-pill ${e.type}`;
+          pill.textContent = e.title;
+          pill.onclick = (event) => {
+            event.stopPropagation();
+            showEventDetails(e.title, e.desc);
+          };
+          cell.appendChild(pill);
+        }
+      });
+
+      // Render Upcoming Today Sidebar list (October 12th)
+      const upcomingContainer = document.getElementById("upcoming-list-container");
+      upcomingContainer.innerHTML = "";
+
+      const todayEvents = filtered.filter(e => e.day === 12);
+      
+      // Let's add the hardcoded items matching the screenshot
+      // Item 1: License Expiry (pink type)
+      const hasExpiry = todayEvents.some(e => e.type === "pink");
+      if (hasExpiry) {
+        const div = document.createElement("div");
+        div.className = "upcoming-item";
+        div.onclick = () => showEventDetails("License Expiry", "Driver M. Jones CDL Class A expires today.");
+        div.innerHTML = `
+          <div class="upcoming-icon-box pink">
+            <span class="material-symbols-outlined">warning</span>
+          </div>
+          <div class="upcoming-info">
+            <div class="upcoming-item-title">License Expiry</div>
+            <div class="upcoming-item-desc">M. Jones - CDL Class A</div>
+            <div class="upcoming-item-due">Due today</div>
+          </div>
+        `;
+        upcomingContainer.appendChild(div);
+      }
+
+      // Item 2: Driver on Leave (purple type)
+      const hasLeave = todayEvents.some(e => e.type === "purple");
+      if (hasLeave) {
+        const div = document.createElement("div");
+        div.className = "upcoming-item";
+        div.onclick = () => showEventDetails("Driver on Leave", "Driver A. Baker is out on PTO.");
+        div.innerHTML = `
+          <div class="upcoming-icon-box purple">
+            <span class="material-symbols-outlined">person_off</span>
+          </div>
+          <div class="upcoming-info">
+            <div class="upcoming-item-title">Driver on Leave</div>
+            <div class="upcoming-item-desc">A. Baker - PTO</div>
+            <div class="upcoming-item-desc" style="color: #64748b; font-weight: 500;">All Day</div>
+          </div>
+        `;
+        upcomingContainer.appendChild(div);
+      }
+
+      // Item 3: Completed Trip TR 1049 (blue type) - Completed 08:00 AM
+      const hasTrips = showTrips; // only show if Scheduled Trips checked
+      if (hasTrips) {
+        const div = document.createElement("div");
+        div.className = "upcoming-item";
+        div.onclick = () => showEventDetails("TR 1049 (BOS)", "Trip to Boston completed by S. Williams at 08:00 AM.");
+        div.innerHTML = `
+          <div class="upcoming-icon-box blue">
+            <span class="material-symbols-outlined">check_circle</span>
+          </div>
+          <div class="upcoming-info">
+            <div class="upcoming-item-title">TR 1049 (BOS)</div>
+            <div class="upcoming-item-desc">Completed by S. Williams</div>
+            <div class="upcoming-item-desc" style="color: #64748b; font-weight: 500;">08:00 AM</div>
+          </div>
+        `;
+        upcomingContainer.appendChild(div);
+      }
+
+      if (upcomingContainer.innerHTML === "") {
+        upcomingContainer.innerHTML = `<div style="text-align: center; font-size: 12px; color: #94a3b8; padding: 12px;">No events scheduled today.</div>`;
+      }
+    }
+
+    function toggleFilterState() {
+      renderEvents();
+      showToast("Applied filters successfully.", "info");
+    }
+
+    // --- SEARCH ---
+    function handleSearch(val) {
+      const query = val.trim().toLowerCase();
+      if (!query) return;
+      showToast(`Searching for trips, drivers, or vehicles matching "${query}"...`, "info");
+    }
+
+    // --- SEGMENTED VIEW SWITCHER ---
+    function switchView(viewName, btnEl) {
+      document.querySelectorAll(".segment-btn").forEach(b => b.classList.remove("active"));
+      btnEl.classList.add("active");
+      showToast(`Switched calendar view to ${viewName}`, "info");
+    }
+
+    // --- NAVIGATION MONTH ---
+    function navigateCalendar(dir) {
+      const label = document.getElementById("calendar-month-header");
+      if (dir === 1) {
+        label.textContent = "November 2023";
+        showToast("Loaded November 2023 calendar", "info");
+      } else {
+        label.textContent = "October 2023";
+        showToast("Loaded October 2023 calendar", "info");
+      }
+    }
+
+    // --- SIDEBAR TOGGLE ---
+    function toggleSidebar() {
+      const sidebar = document.getElementById("sidebar");
+      const overlay = document.getElementById("sidebar-overlay");
+      sidebar.classList.toggle("open");
+      overlay.classList.toggle("show");
+    }
+
+    // --- DETAILS MODAL ---
+    function showEventDetails(title, desc) {
+      document.getElementById("details-subject").textContent = title;
+      document.getElementById("details-desc").textContent = desc;
+      openModal("details-modal");
+    }
+
+    // --- NEW EVENT CREATION ---
+    function handleNewEvent(e) {
+      e.preventDefault();
+      
+      const title = document.getElementById("event-title").value;
+      const day = parseInt(document.getElementById("event-day").value);
+      const type = document.getElementById("event-type").value;
+      const desc = document.getElementById("event-desc").value;
+
+      const newEv = {
+        id: Date.now(),
+        day,
+        type,
+        title,
+        desc
+      };
+
+      calendarEvents.push(newEv);
+      renderEvents();
+      closeModal("new-event-modal");
+      document.getElementById("new-event-form").reset();
+      showToast(`Successfully created event "${title}" on Oct ${day}!`, "success");
+    }
+
+    // --- QUICK ACTIONS ---
+    function openQuickAction(actionName) {
+      document.getElementById("quick-action-modal-title").textContent = actionName;
+      const detailLabel = document.querySelector("#quick-action-form label[for='qa-detail']");
+      const detailInput = document.getElementById("qa-detail");
+
+      if (actionName === "Log Repair") {
+        detailLabel.textContent = "Work Order / Problem Description";
+        detailInput.placeholder = "e.g. Brake pad change - Bay 2";
+      } else {
+        detailLabel.textContent = "Route / Task Detail";
+        detailInput.placeholder = "e.g. Route #884 en route to Detroit";
+      }
+
+      openModal("quick-action-modal");
+    }
+
+    function handleQuickActionSave(e) {
+      e.preventDefault();
+      const asset = document.getElementById("qa-asset").value;
+      const detail = document.getElementById("qa-detail").value;
+      const title = document.getElementById("quick-action-modal-title").textContent;
+
+      closeModal("quick-action-modal");
+      document.getElementById("quick-action-form").reset();
+      showToast(`Action "${title}" confirmed for ${asset}!`, "success");
+    }
+
+    // --- MODAL UTILS ---
+    function openModal(id) {
+      document.getElementById(id).classList.add("show");
+    }
+    function closeModal(id) {
+      document.getElementById(id).classList.remove("show");
+    }
+
+    // --- NAV TOAST ---
+    function triggerNavDevelopment(moduleName) {
+      showToast(`"${moduleName}" is under development. Connecting routes...`, "info");
+    }
+
+    function triggerLogout() {
+      showToast("Logging out J. Doe...", "error");
+      setTimeout(() => {
+        window.location.href = "login.html";
+      }, 1000);
+    }
+
+    // --- NOTIFICATION DRAWER ---
+    function toggleNotifications(e) {
+      e.stopPropagation();
+      document.getElementById("notif-panel").classList.toggle("show");
+    }
+
+    function renderNotificationsList() {
+      const container = document.getElementById("notifications-container");
+      container.innerHTML = "";
+      notifications.forEach(n => {
+        const div = document.createElement("div");
+        div.className = "notif-item";
+        div.innerHTML = `<span class="notif-item-text">${n.text}</span>`;
+        container.appendChild(div);
+      });
+    }
+
+    function markAllNotificationsRead() {
+      notifications = [];
+      document.getElementById("notif-dot").style.display = "none";
+      renderNotificationsList();
+      showToast("Cleared all notifications.", "success");
+    }
+  </script>
+</body>
+</html>

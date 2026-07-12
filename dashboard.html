@@ -1,0 +1,1883 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Command Center - TransitOps Fleet Management</title>
+  <!-- Google Fonts & Material Symbols -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet" />
+  
+  <style>
+    /* RESET & BASE */
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    body {
+      font-family: 'Inter', sans-serif;
+      background-color: #f8fafc;
+      color: #0f172a;
+      height: 100vh;
+      overflow: hidden;
+      display: flex;
+    }
+    
+    /* SCROLLBARS */
+    .custom-scrollbar::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-track {
+      background: transparent;
+    }
+    .custom-scrollbar::-webkit-scrollbar-thumb {
+      background: #cbd5e1;
+      border-radius: 4px;
+    }
+    .custom-scrollbar:hover::-webkit-scrollbar-thumb {
+      background: #94a3b8;
+    }
+
+    /* TOAST ALERTS */
+    #toast-container {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      z-index: 9999;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .toast {
+      background: #1e293b;
+      color: #ffffff;
+      padding: 12px 20px;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 500;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      transform: translateY(-20px);
+      opacity: 0;
+      animation: toastIn 0.3s forwards;
+      transition: opacity 0.3s, transform 0.3s;
+    }
+    @keyframes toastIn {
+      to {
+        transform: translateY(0);
+        opacity: 1;
+      }
+    }
+    .toast.success {
+      background-color: #059669;
+    }
+    .toast.info {
+      background-color: #2563eb;
+    }
+    .toast.error {
+      background-color: #ef4444;
+    }
+
+    /* LAYOUT PATTERN */
+    .app-container {
+      display: flex;
+      width: 100vw;
+      height: 100vh;
+      position: relative;
+    }
+
+    /* SIDEBAR (Left) */
+    .sidebar {
+      width: 250px;
+      background: #ffffff;
+      border-right: 1px solid #e2e8f0;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      padding: 24px 16px;
+      flex-shrink: 0;
+      z-index: 100;
+      transition: transform 0.3s ease;
+    }
+    .sidebar-logo {
+      margin-bottom: 32px;
+      padding-left: 8px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .sidebar-logo-icon {
+      width: 32px;
+      height: 32px;
+      border-radius: 6px;
+      background: #0f172a;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #ffffff;
+    }
+    .sidebar-logo-icon span {
+      font-size: 20px;
+    }
+    .sidebar-logo-text h1 {
+      font-size: 16px;
+      font-weight: 700;
+      color: #0f172a;
+      line-height: 1.2;
+    }
+    .sidebar-logo-text p {
+      font-size: 10px;
+      font-weight: 500;
+      color: #64748b;
+      margin-top: 1px;
+    }
+    .sidebar-nav {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      flex-grow: 1;
+      overflow-y: auto;
+    }
+    .nav-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 10px 12px;
+      border-radius: 8px;
+      text-decoration: none;
+      color: #475569;
+      font-size: 14px;
+      font-weight: 500;
+      transition: background 0.15s, color 0.15s;
+    }
+    .nav-item:hover {
+      background: #f1f5f9;
+      color: #0f172a;
+    }
+    .nav-item.active {
+      background: #eff6ff;
+      color: #2563eb;
+      font-weight: 600;
+    }
+    .nav-item .material-symbols-outlined {
+      font-size: 20px;
+    }
+    .sidebar-bottom {
+      border-top: 1px solid #f1f5f9;
+      padding-top: 16px;
+      margin-top: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .profile-card {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 8px;
+      border-radius: 8px;
+      cursor: pointer;
+      position: relative;
+      transition: background 0.15s;
+    }
+    .profile-card:hover {
+      background: #f1f5f9;
+    }
+    .profile-avatar-img {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      object-cover: cover;
+    }
+    .profile-info {
+      flex: 1;
+      overflow: hidden;
+    }
+    .profile-name {
+      font-size: 13px;
+      font-weight: 600;
+      color: #0f172a;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .profile-email {
+      font-size: 11px;
+      color: #64748b;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .profile-menu {
+      position: absolute;
+      bottom: 56px;
+      left: 8px;
+      right: 8px;
+      background: #ffffff;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+      display: none;
+      flex-direction: column;
+      padding: 6px 0;
+      z-index: 120;
+    }
+    .profile-menu.show {
+      display: flex;
+    }
+    .profile-menu-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 8px 12px;
+      font-size: 13px;
+      color: #475569;
+      background: none;
+      border: none;
+      width: 100%;
+      text-align: left;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+    .profile-menu-item:hover {
+      background: #f1f5f9;
+      color: #0f172a;
+    }
+    .profile-menu-item.logout {
+      color: #ef4444;
+      border-top: 1px solid #f1f5f9;
+      margin-top: 4px;
+      padding-top: 10px;
+    }
+
+    /* MAIN VIEW CONTAINER */
+    .main-view {
+      display: flex;
+      flex-direction: column;
+      flex-grow: 1;
+      height: 100%;
+      overflow: hidden;
+    }
+
+    /* TOP HEADER */
+    .header {
+      height: 64px;
+      background: #ffffff;
+      border-bottom: 1px solid #e2e8f0;
+      padding: 0 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-shrink: 0;
+      z-index: 90;
+    }
+    .menu-trigger {
+      display: none;
+      background: none;
+      border: none;
+      cursor: pointer;
+      color: #475569;
+      margin-right: 12px;
+    }
+    .search-wrapper {
+      position: relative;
+      max-width: 360px;
+      width: 100%;
+    }
+    .search-icon {
+      position: absolute;
+      left: 14px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: #94a3b8;
+      font-size: 20px;
+      pointer-events: none;
+    }
+    .search-input {
+      width: 100%;
+      height: 38px;
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 9999px;
+      padding: 0 16px 0 42px;
+      font-size: 13px;
+      color: #0f172a;
+      outline: none;
+      transition: border-color 0.15s, box-shadow 0.15s, background-color 0.15s;
+    }
+    .search-input:focus {
+      border-color: #2563eb;
+      background-color: #ffffff;
+      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+    }
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .notif-button {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background: none;
+      border: none;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #475569;
+      cursor: pointer;
+      position: relative;
+      transition: background 0.15s;
+    }
+    .notif-button:hover {
+      background: #f1f5f9;
+      color: #0f172a;
+    }
+    .notif-dot {
+      position: absolute;
+      top: 6px;
+      right: 6px;
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #ef4444;
+      border: 2px solid #ffffff;
+    }
+    
+    /* NOTIFICATIONS PANEL */
+    .notif-panel {
+      position: absolute;
+      top: 56px;
+      right: 24px;
+      width: 320px;
+      background: #ffffff;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+      display: none;
+      flex-direction: column;
+      z-index: 150;
+      max-height: 400px;
+    }
+    .notif-panel.show {
+      display: flex;
+    }
+    .notif-header {
+      padding: 12px 16px;
+      border-bottom: 1px solid #f1f5f9;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .notif-header h4 {
+      font-size: 14px;
+      font-weight: 600;
+    }
+    .notif-clear {
+      font-size: 12px;
+      color: #2563eb;
+      background: none;
+      border: none;
+      cursor: pointer;
+      font-weight: 500;
+    }
+    .notif-clear:hover {
+      text-decoration: underline;
+    }
+    .notif-list {
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+    }
+    .notif-item {
+      padding: 12px 16px;
+      border-bottom: 1px solid #f1f5f9;
+      display: flex;
+      gap: 10px;
+      align-items: flex-start;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+    .notif-item:hover {
+      background: #f8fafc;
+    }
+    .notif-item.unread {
+      background: #f0f7ff;
+    }
+    .notif-item-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: #2563eb;
+      margin-top: 6px;
+      flex-shrink: 0;
+    }
+    .notif-item-content {
+      flex: 1;
+    }
+    .notif-item-text {
+      font-size: 12px;
+      color: #334155;
+      line-height: 1.4;
+    }
+    .notif-item-time {
+      font-size: 11px;
+      color: #94a3b8;
+      margin-top: 4px;
+    }
+
+    /* MAIN VIEW DATA SECTION */
+    .dashboard-content {
+      flex: 1;
+      padding: 24px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+    .page-title {
+      font-size: 24px;
+      font-weight: 700;
+      color: #0f172a;
+      margin-bottom: 4px;
+    }
+
+    /* KPI GRID */
+    .kpi-grid {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 16px;
+    }
+    .kpi-card {
+      background: #ffffff;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+      padding: 16px;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      position: relative;
+    }
+    .kpi-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+    }
+    .kpi-label {
+      font-size: 10px;
+      font-weight: 700;
+      color: #64748b;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    .kpi-icon-box {
+      color: #64748b;
+    }
+    .kpi-icon-box span {
+      font-size: 20px;
+    }
+    .kpi-icon-box.blue { color: #2563eb; }
+    .kpi-icon-box.green { color: #10b981; }
+    .kpi-icon-box.orange { color: #f97316; }
+    
+    .kpi-value-block {
+      display: flex;
+      align-items: flex-end;
+      gap: 8px;
+    }
+    .kpi-value {
+      font-size: 28px;
+      font-weight: 700;
+      color: #0f172a;
+      line-height: 1.1;
+    }
+    .kpi-trend {
+      font-size: 12px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      margin-bottom: 3px;
+    }
+    .kpi-trend.green { color: #10b981; }
+    .kpi-trend.red { color: #ef4444; }
+    .kpi-target {
+      font-size: 11px;
+      color: #64748b;
+      margin-bottom: 3px;
+    }
+    .kpi-progress-bar {
+      width: 100%;
+      height: 4px;
+      background: #e2e8f0;
+      border-radius: 9999px;
+      margin-top: 8px;
+      overflow: hidden;
+    }
+    .kpi-progress-fill {
+      height: 100%;
+      background: #2563eb;
+      border-radius: 9999px;
+      width: 88%;
+    }
+
+    /* GRID SPLIT VIEW */
+    .dashboard-split {
+      display: grid;
+      grid-template-columns: 2fr 1fr;
+      gap: 20px;
+      align-items: start;
+    }
+    
+    .left-column, .right-column {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    /* CARD BASE */
+    .dashboard-card {
+      background: #ffffff;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+    .card-header {
+      padding: 16px 20px;
+      border-bottom: 1px solid #e2e8f0;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .card-title-box {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .card-title-box span {
+      font-size: 20px;
+      color: #475569;
+    }
+    .card-title {
+      font-size: 14px;
+      font-weight: 700;
+      color: #0f172a;
+    }
+    .card-body {
+      padding: 20px;
+    }
+
+    /* MAP CARD SPECIFICS */
+    .map-btn-regions {
+      background: #ffffff;
+      border: 1px solid #e2e8f0;
+      border-radius: 6px;
+      padding: 6px 12px;
+      font-size: 12px;
+      font-weight: 500;
+      color: #475569;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: background 0.15s;
+    }
+    .map-btn-regions:hover {
+      background: #f8fafc;
+    }
+    .map-wrapper {
+      position: relative;
+      height: 320px;
+      background: #e2e8f0;
+      border-radius: 6px;
+      overflow: hidden;
+    }
+    .map-img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      opacity: 0.9;
+    }
+    
+    /* MAP PINS */
+    .map-pin {
+      position: absolute;
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      border: 2px solid #ffffff;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.25);
+      cursor: pointer;
+      transition: transform 0.2s;
+    }
+    .map-pin:hover {
+      transform: scale(1.3);
+    }
+    .map-pin.blue {
+      background: #2563eb;
+      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.3), 0 2px 4px rgba(0,0,0,0.25);
+    }
+    .map-pin.blue::after {
+      content: '';
+      position: absolute;
+      inset: -6px;
+      border-radius: 50%;
+      border: 1px solid #2563eb;
+      opacity: 0.8;
+      animation: pinPing 1.5s infinite;
+    }
+    @keyframes pinPing {
+      0% { transform: scale(0.8); opacity: 1; }
+      100% { transform: scale(1.6); opacity: 0; }
+    }
+    .map-pin.green {
+      background: #10b981;
+    }
+    .map-pin.orange {
+      background: #f97316;
+    }
+
+    /* MAP LEGEND overlay */
+    .map-legend {
+      position: absolute;
+      bottom: 12px;
+      right: 12px;
+      background: rgba(255, 255, 255, 0.95);
+      border: 1px solid #e2e8f0;
+      border-radius: 6px;
+      padding: 8px 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+      backdrop-filter: blur(4px);
+    }
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 11px;
+      font-weight: 600;
+      color: #475569;
+    }
+    .legend-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+    }
+    .legend-dot.blue { background: #2563eb; }
+    .legend-dot.green { background: #10b981; }
+    .legend-dot.orange { background: #f97316; }
+
+    /* MAP FILTER BUTTONS BELOW MAP */
+    .map-filters-row {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 12px;
+      margin-top: 16px;
+    }
+    .map-filter-card {
+      background: #ffffff;
+      border: 1px solid #e2e8f0;
+      border-radius: 6px;
+      padding: 10px 12px;
+      cursor: pointer;
+      transition: border-color 0.15s, box-shadow 0.15s, transform 0.15s;
+      position: relative;
+    }
+    .map-filter-card:hover {
+      border-color: #cbd5e1;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.02);
+      transform: translateY(-1px);
+    }
+    .map-filter-card.selected {
+      border-color: #2563eb;
+      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+    }
+    .map-filter-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 12px;
+      right: 12px;
+      height: 3px;
+      border-radius: 0 0 3px 3px;
+    }
+    .map-filter-card.green::before { background: #10b981; }
+    .map-filter-card.blue::before { background: #2563eb; }
+    .map-filter-card.orange::before { background: #f97316; }
+    .map-filter-card.gray::before { background: #94a3b8; }
+    
+    .map-filter-value {
+      font-size: 18px;
+      font-weight: 700;
+      color: #0f172a;
+      margin-bottom: 2px;
+    }
+    .map-filter-label {
+      font-size: 11px;
+      font-weight: 600;
+      color: #64748b;
+    }
+    .map-filter-card.selected .map-filter-label {
+      color: #2563eb;
+    }
+
+    /* ACTIVITY FEED */
+    .activity-list {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+    .activity-item {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+    .activity-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+    .activity-dot.blue { background: #2563eb; }
+    .activity-dot.green { background: #10b981; }
+    .activity-dot.orange { background: #f97316; }
+    .activity-dot.gray { background: #cbd5e1; }
+    
+    .activity-time {
+      font-size: 12px;
+      font-weight: 600;
+      color: #64748b;
+      width: 48px;
+      flex-shrink: 0;
+    }
+    .activity-desc {
+      font-size: 13px;
+      color: #334155;
+    }
+
+    /* ALERTS CARD */
+    .alert-box {
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+      padding: 12px 16px;
+      margin-bottom: 12px;
+      display: flex;
+      gap: 12px;
+      align-items: flex-start;
+      cursor: pointer;
+      transition: background 0.15s, border-color 0.15s;
+    }
+    .alert-box:last-child {
+      margin-bottom: 0;
+    }
+    .alert-box:hover {
+      background: #f1f5f9;
+    }
+    .alert-box.critical {
+      background: #fef2f2;
+      border-color: #fecaca;
+    }
+    .alert-box.critical:hover {
+      background: #fee2e2;
+    }
+    .alert-icon-box {
+      color: #64748b;
+      margin-top: 2px;
+    }
+    .alert-box.critical .alert-icon-box {
+      color: #ef4444;
+    }
+    .alert-text-block {
+      flex: 1;
+    }
+    .alert-title {
+      font-size: 13px;
+      font-weight: 600;
+      color: #0f172a;
+    }
+    .alert-desc {
+      font-size: 11px;
+      color: #64748b;
+      margin-top: 2px;
+    }
+
+    /* SCHEDULE CARD */
+    .schedule-add-btn {
+      background: none;
+      border: none;
+      color: #2563eb;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      transition: background 0.15s;
+    }
+    .schedule-add-btn:hover {
+      background: #f1f5f9;
+    }
+    .schedule-item {
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+      padding: 12px 16px;
+      margin-bottom: 12px;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      cursor: pointer;
+      transition: border-color 0.15s, background 0.15s;
+    }
+    .schedule-item:last-child {
+      margin-bottom: 0;
+    }
+    .schedule-item:hover {
+      background: #f8fafc;
+      border-color: #cbd5e1;
+    }
+    .schedule-left {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .schedule-time-badge {
+      align-self: flex-start;
+      background: #eff6ff;
+      color: #2563eb;
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-size: 11px;
+      font-weight: 600;
+    }
+    .schedule-title {
+      font-size: 13px;
+      font-weight: 600;
+      color: #0f172a;
+    }
+    .schedule-item.done .schedule-title {
+      text-decoration: line-through;
+      color: #64748b;
+    }
+    .schedule-desc {
+      font-size: 11px;
+      color: #64748b;
+    }
+    .schedule-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      margin-top: 4px;
+    }
+    .schedule-dot.blue { background: #2563eb; }
+    .schedule-dot.orange { background: #f97316; }
+    .schedule-dot.checkmark {
+      background: none;
+      color: #10b981;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .schedule-dot.checkmark span {
+      font-size: 16px;
+    }
+
+    /* EXPIRIES CARD */
+    .expiry-view-all {
+      font-size: 12px;
+      color: #2563eb;
+      text-decoration: none;
+      font-weight: 600;
+    }
+    .expiry-view-all:hover {
+      text-decoration: underline;
+    }
+    .expiry-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 12px;
+      cursor: pointer;
+      padding: 6px 8px;
+      border-radius: 6px;
+      transition: background 0.15s;
+    }
+    .expiry-item:last-child {
+      margin-bottom: 0;
+    }
+    .expiry-item:hover {
+      background: #f8fafc;
+    }
+    .expiry-icon-box {
+      width: 32px;
+      height: 32px;
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+    .expiry-icon-box.orange { background: #ffedd5; color: #ea580c; }
+    .expiry-icon-box.red { background: #fee2e2; color: #ef4444; }
+    .expiry-icon-box.blue { background: #dbeafe; color: #2563eb; }
+    .expiry-icon-box span {
+      font-size: 18px;
+    }
+    
+    .expiry-info {
+      flex: 1;
+    }
+    .expiry-title {
+      font-size: 13px;
+      font-weight: 600;
+      color: #0f172a;
+    }
+    .expiry-desc {
+      font-size: 11px;
+      color: #64748b;
+      margin-top: 1px;
+    }
+    .expiry-desc.red {
+      color: #ef4444;
+      font-weight: 500;
+    }
+
+    /* MODAL POPUPS */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(15, 23, 42, 0.4);
+      backdrop-filter: blur(4px);
+      z-index: 1000;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+    }
+    .modal-overlay.show {
+      display: flex;
+    }
+    .modal {
+      background: #ffffff;
+      border-radius: 12px;
+      width: 100%;
+      max-width: 440px;
+      box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      animation: modalScale 0.25s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+    }
+    @keyframes modalScale {
+      from { transform: scale(0.95); opacity: 0; }
+      to { transform: scale(1); opacity: 1; }
+    }
+    .modal-header {
+      padding: 16px 20px;
+      border-bottom: 1px solid #e2e8f0;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .modal-header h3 {
+      font-size: 16px;
+      font-weight: 700;
+      color: #0f172a;
+    }
+    .modal-close {
+      background: none;
+      border: none;
+      color: #94a3b8;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      transition: background 0.15s;
+    }
+    .modal-close:hover {
+      background: #f1f5f9;
+      color: #0f172a;
+    }
+    .modal-body {
+      padding: 20px;
+    }
+    .modal-footer {
+      padding: 12px 20px;
+      border-top: 1px solid #e2e8f0;
+      display: flex;
+      justify-content: flex-end;
+      gap: 8px;
+      background: #f8fafc;
+    }
+    
+    /* FORM INPUTS */
+    .form-group {
+      margin-bottom: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    .form-group:last-child {
+      margin-bottom: 0;
+    }
+    .form-label {
+      font-size: 11px;
+      font-weight: 600;
+      color: #64748b;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    .form-input, .form-select, .form-textarea {
+      width: 100%;
+      padding: 8px 12px;
+      font-size: 13px;
+      border: 1px solid #e2e8f0;
+      border-radius: 6px;
+      outline: none;
+      font-family: inherit;
+    }
+    .form-input:focus, .form-select:focus, .form-textarea:focus {
+      border-color: #2563eb;
+      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+    }
+    
+    .btn {
+      height: 36px;
+      padding: 0 16px;
+      font-size: 13px;
+      font-weight: 600;
+      border-radius: 6px;
+      border: none;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.15s, border-color 0.15s;
+    }
+    .btn-secondary {
+      background: #ffffff;
+      border: 1px solid #e2e8f0;
+      color: #475569;
+    }
+    .btn-secondary:hover {
+      background: #f8fafc;
+      border-color: #cbd5e1;
+    }
+    .btn-primary {
+      background: #2563eb;
+      color: #ffffff;
+    }
+    .btn-primary:hover {
+      background: #1d4ed8;
+    }
+
+    /* RESPONSIVE */
+    @media (max-width: 1180px) {
+      .kpi-grid {
+        grid-template-columns: repeat(3, 1fr);
+      }
+    }
+    @media (max-width: 1024px) {
+      .dashboard-split {
+        grid-template-columns: 1fr;
+      }
+    }
+    @media (max-width: 768px) {
+      .menu-trigger {
+        display: block;
+      }
+      .sidebar {
+        position: fixed;
+        left: 0;
+        top: 0;
+        bottom: 0;
+        transform: translateX(-100%);
+      }
+      .sidebar.open {
+        transform: translateX(0);
+      }
+      .sidebar-overlay {
+        position: fixed;
+        inset: 0;
+        background: rgba(15, 23, 42, 0.4);
+        z-index: 99;
+        display: none;
+      }
+      .sidebar-overlay.show {
+        display: block;
+      }
+      .kpi-grid {
+        grid-template-columns: 1fr 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- TOAST NOTIFICATION CONTAINER -->
+  <div id="toast-container"></div>
+
+  <!-- MODAL: ADD SCHEDULE ITEM -->
+  <div class="modal-overlay" id="add-schedule-modal">
+    <div class="modal">
+      <form id="add-schedule-form" onsubmit="handleNewSchedule(event)">
+        <div class="modal-header">
+          <h3>Create Schedule Event</h3>
+          <button type="button" class="modal-close" onclick="closeModal('add-schedule-modal')">
+            <span class="material-symbols-outlined">close</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          <div class="form-group">
+            <label class="form-label" for="sched-time">Time</label>
+            <input type="text" class="form-input" id="sched-time" placeholder="e.g. 10:00 AM" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="sched-title">Title</label>
+            <input type="text" class="form-input" id="sched-title" placeholder="e.g. Route 44B Dispatch" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="sched-desc">Description</label>
+            <input type="text" class="form-input" id="sched-desc" placeholder="e.g. Driver: S. Miller. Vehicle: Veh-209.">
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="sched-type">Type</label>
+            <select class="form-select" id="sched-type">
+              <option value="blue">On Trip (Blue)</option>
+              <option value="orange">Maintenance (Orange)</option>
+              <option value="green">Completed (Green Check)</option>
+            </select>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" onclick="closeModal('add-schedule-modal')">Cancel</button>
+          <button type="submit" class="btn btn-primary">Save Event</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL: EVENT DETAILS -->
+  <div class="modal-overlay" id="details-modal">
+    <div class="modal">
+      <div class="modal-header">
+        <h3 id="details-modal-title">Event Information</h3>
+        <button class="modal-close" onclick="closeModal('details-modal')">
+          <span class="material-symbols-outlined">close</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div style="display: flex; flex-direction: column; gap: 12px;">
+          <div class="form-group">
+            <label class="form-label">Subject</label>
+            <p id="details-modal-subject" style="font-size: 14px; font-weight: 600; color: #0f172a;"></p>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Details</label>
+            <p id="details-modal-desc" style="font-size: 13px; color: #475569; line-height: 1.4;"></p>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-primary" onclick="closeModal('details-modal')">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="app-container">
+
+    <!-- MOBILE SIDEBAR OVERLAY -->
+    <div class="sidebar-overlay" id="sidebar-overlay" onclick="toggleSidebar()"></div>
+
+    <!-- SIDEBAR -->
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-logo">
+        <div class="sidebar-logo-icon">
+          <span class="material-symbols-outlined">local_shipping</span>
+        </div>
+        <div class="sidebar-logo-text">
+          <h1>TransitOps</h1>
+          <p>Fleet Management</p>
+        </div>
+      </div>
+
+      <nav class="sidebar-nav">
+        <a href="dashboard.html" class="nav-item active">
+          <span class="material-symbols-outlined">dashboard</span>
+          Dashboard
+        </a>
+        <a href="vehicle-registry.html" class="nav-item">
+          <span class="material-symbols-outlined">local_shipping</span>
+          Vehicles
+        </a>
+        <a href="#" class="nav-item" onclick="triggerNavDevelopment('Drivers')">
+          <span class="material-symbols-outlined">person</span>
+          Drivers
+        </a>
+        <a href="#" class="nav-item" onclick="triggerNavDevelopment('Trips')">
+          <span class="material-symbols-outlined">route</span>
+          Trips
+        </a>
+        <a href="#" class="nav-item" onclick="triggerNavDevelopment('Maintenance')">
+          <span class="material-symbols-outlined">build</span>
+          Maintenance
+        </a>
+        <a href="#" class="nav-item" onclick="triggerNavDevelopment('Fuel/Expenses')">
+          <span class="material-symbols-outlined">local_gas_station</span>
+          Fuel/Expenses
+        </a>
+        <a href="#" class="nav-item" onclick="triggerNavDevelopment('Reports')">
+          <span class="material-symbols-outlined">bar_chart</span>
+          Reports
+        </a>
+        <a href="#" class="nav-item" onclick="triggerNavDevelopment('Calendar')">
+          <span class="material-symbols-outlined">calendar_today</span>
+          Calendar
+        </a>
+        <a href="#" class="nav-item" onclick="triggerNavDevelopment('Documents')">
+          <span class="material-symbols-outlined">description</span>
+          Documents
+        </a>
+      </nav>
+
+      <div class="sidebar-bottom">
+        <a href="#" class="nav-item" onclick="triggerNavDevelopment('Settings')">
+          <span class="material-symbols-outlined">settings</span>
+          Settings
+        </a>
+        
+        <div class="profile-card" onclick="toggleProfileMenu(event)">
+          <!-- Circular avatar image -->
+          <img 
+            alt="Admin avatar" 
+            class="profile-avatar-img" 
+            src="https://lh3.googleusercontent.com/aida-public/AB6AXuDTu7H7bjM1-TANNlJst9JmkZFG0YdSnIhaLCui21I-J9R635iCjK3AFrUyIbn5Rl9UyK2POQajHzXQMsAUqaLnDRnFyqeyBSGYtfi1slflZ6vaOsfHBPpzAPs3U1rF8PeB8p9jjtRvCaDbhYjwFEB76tk3aM0TxiTTgp1rCQ0qYUeoE7hFSQunQhY_CBpCO49IWfPwvSavwT5OzGK3r-sZjsptTdVO7unZLcj1l2DF_38XWXoiF08O"
+          />
+          <div class="profile-info">
+            <div class="profile-name">Admin User</div>
+            <div class="profile-email">admin@transitops.com</div>
+          </div>
+
+          <!-- Dropdown menu -->
+          <div class="profile-menu" id="profile-menu">
+            <button class="profile-menu-item" onclick="triggerNavDevelopment('My Profile')">
+              <span class="material-symbols-outlined">account_circle</span>
+              My Profile
+            </button>
+            <button class="profile-menu-item" onclick="triggerNavDevelopment('System Settings')">
+              <span class="material-symbols-outlined">settings</span>
+              Settings
+            </button>
+            <button class="profile-menu-item logout" onclick="triggerLogout()">
+              <span class="material-symbols-outlined">logout</span>
+              Log Out
+            </button>
+          </div>
+        </div>
+      </div>
+    </aside>
+
+    <!-- MAIN VIEW -->
+    <div class="main-view">
+      
+      <!-- TOP HEADER -->
+      <header class="header">
+        <div style="display: flex; align-items: center; width: 100%;">
+          <button class="menu-trigger" onclick="toggleSidebar()">
+            <span class="material-symbols-outlined">menu</span>
+          </button>
+          <div class="page-title" style="margin-bottom: 0; font-size: 18px; margin-right: 24px; font-weight: 700; white-space: nowrap;">Command Center</div>
+        </div>
+
+        <div class="header-actions">
+          <div class="search-wrapper" style="margin-right: 16px;">
+            <span class="material-symbols-outlined search-icon">search</span>
+            <input 
+              type="text" 
+              class="search-input" 
+              placeholder="Search vehicles, trips, drivers..."
+              id="search-box"
+              oninput="handleSearch(this.value)"
+            >
+          </div>
+
+          <button class="notif-button" id="notif-bell" onclick="toggleNotifications(event)">
+            <span class="material-symbols-outlined">notifications</span>
+            <span class="notif-dot" id="notif-dot"></span>
+          </button>
+
+          <!-- Notifications panel -->
+          <div class="notif-panel" id="notif-panel">
+            <div class="notif-header">
+              <h4>Notifications</h4>
+              <button class="notif-clear" onclick="markAllNotificationsRead()">Mark all read</button>
+            </div>
+            <div class="notif-list custom-scrollbar" id="notifications-container">
+              <!-- Populated via Javascript -->
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <!-- DASHBOARD WORKSPACE -->
+      <div class="dashboard-content custom-scrollbar">
+        
+        <!-- KPI SECTION -->
+        <section class="kpi-grid">
+          <!-- Active Vehicles -->
+          <div class="kpi-card">
+            <div class="kpi-header">
+              <span class="kpi-label">Active Vehicles</span>
+              <div class="kpi-icon-box blue"><span class="material-symbols-outlined">local_shipping</span></div>
+            </div>
+            <div class="kpi-value-block">
+              <span class="kpi-value">32</span>
+              <span class="kpi-trend green">
+                <span class="material-symbols-outlined" style="font-size: 14px; font-weight: bold; margin-right: 2px;">arrow_upward</span>2
+              </span>
+            </div>
+          </div>
+
+          <!-- Available -->
+          <div class="kpi-card">
+            <div class="kpi-header">
+              <span class="kpi-label">Available</span>
+              <div class="kpi-icon-box green"><span class="material-symbols-outlined">check_circle</span></div>
+            </div>
+            <div class="kpi-value-block">
+              <span class="kpi-value">12</span>
+            </div>
+          </div>
+
+          <!-- In Maintenance -->
+          <div class="kpi-card">
+            <div class="kpi-header">
+              <span class="kpi-label">In Maintenance</span>
+              <div class="kpi-icon-box orange"><span class="material-symbols-outlined">build</span></div>
+            </div>
+            <div class="kpi-value-block">
+              <span class="kpi-value">4</span>
+              <span class="kpi-trend red">
+                <span class="material-symbols-outlined" style="font-size: 14px; font-weight: bold; margin-right: 2px;">arrow_upward</span>1
+              </span>
+            </div>
+          </div>
+
+          <!-- Active Trips -->
+          <div class="kpi-card">
+            <div class="kpi-header">
+              <span class="kpi-label">Active Trips</span>
+              <div class="kpi-icon-box blue"><span class="material-symbols-outlined">route</span></div>
+            </div>
+            <div class="kpi-value-block">
+              <span class="kpi-value">28</span>
+            </div>
+          </div>
+
+          <!-- Utilization -->
+          <div class="kpi-card">
+            <div class="kpi-header">
+              <span class="kpi-label">Utilization</span>
+              <div class="kpi-icon-box blue"><span class="material-symbols-outlined">pie_chart</span></div>
+            </div>
+            <div>
+              <div style="display: flex; justify-content: space-between; align-items: flex-end;">
+                <span class="kpi-value">88%</span>
+                <span class="kpi-target">Target: 85%</span>
+              </div>
+              <div class="kpi-progress-bar">
+                <div class="kpi-progress-fill"></div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- SPLIT GRID LAYOUT -->
+        <div class="dashboard-split">
+          
+          <!-- LEFT COLUMN (Map & Feed) -->
+          <div class="left-column">
+            
+            <!-- Map Card -->
+            <div class="dashboard-card">
+              <div class="card-header">
+                <div class="card-title-box">
+                  <span class="material-symbols-outlined">map</span>
+                  <span class="card-title">Live Fleet Map</span>
+                </div>
+                <button class="map-btn-regions" onclick="triggerRegionsMenu(event)">
+                  <span>All Regions</span>
+                  <span class="material-symbols-outlined" style="font-size: 16px;">expand_more</span>
+                </button>
+              </div>
+              <div class="card-body" style="padding: 16px;">
+                <div class="map-wrapper">
+                  <!-- Map background image -->
+                  <img 
+                    alt="Fleet Map View" 
+                    class="map-img" 
+                    src="https://lh3.googleusercontent.com/aida-public/AB6AXuCJZMKgdAWlTBOUUCx_avPYiFhL-__Sb7zWKkZoeKPYHvtMt7gkcHItXytZFpPRs-GIl1zVKsWS2iTNtNKIdm-7lPziGbbqkML881ATlzyQdzXHhBHIc2IfbQh4shORTOP89E-v9E-RVkb1ENEQ_yaK7kqjCcqqTXKERDYrDJw6JO37RXxh0clENZRuEvIa7zXDv6UgrUTEAG59z549_cqK9yKWpXzj3IuHFt1o4Qfmasp6VXrn15OG"
+                  />
+                  
+                  <!-- Map pins positioned absolute -->
+                  <div class="map-pin blue" style="top: 35%; left: 45%;" onclick="openDetails('Alpha Hauler (TRK-9021)', 'Status: On Trip. Route: Route #884 en route to Detroit.')" data-pin-status="On Trip"></div>
+                  <div class="map-pin green" style="top: 45%; left: 55%;" onclick="openDetails('City Sprinter (VAN-405)', 'Status: Available. Parked at South Hub depot.')" data-pin-status="Available"></div>
+                  <div class="map-pin orange" style="top: 50%; left: 35%;" onclick="openDetails('Beta Hauler (TRK-8832)', 'Status: Maintenance. Vehicle in workshop for brake repairs.')" data-pin-status="Maintenance"></div>
+
+                  <!-- Legend -->
+                  <div class="map-legend">
+                    <div class="legend-item">
+                      <div class="legend-dot blue"></div> On Trip
+                    </div>
+                    <div class="legend-item">
+                      <div class="legend-dot green"></div> Available
+                    </div>
+                    <div class="legend-item">
+                      <div class="legend-dot orange"></div> Maintenance
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Status Filter Cards -->
+                <div class="map-filters-row">
+                  <div class="map-filter-card green" onclick="filterMapPins('Available', this)">
+                    <div class="map-filter-value">12</div>
+                    <div class="map-filter-label">Available</div>
+                  </div>
+                  <div class="map-filter-card blue selected" onclick="filterMapPins('On Trip', this)">
+                    <div class="map-filter-value">28</div>
+                    <div class="map-filter-label">On Trip</div>
+                  </div>
+                  <div class="map-filter-card orange" onclick="filterMapPins('Maintenance', this)">
+                    <div class="map-filter-value">4</div>
+                    <div class="map-filter-label">Maintenance</div>
+                  </div>
+                  <div class="map-filter-card gray" onclick="filterMapPins('Retired', this)">
+                    <div class="map-filter-value">3</div>
+                    <div class="map-filter-label">Retired</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Activity Feed Card -->
+            <div class="dashboard-card">
+              <div class="card-header">
+                <div class="card-title-box">
+                  <span class="material-symbols-outlined">history</span>
+                  <span class="card-title">Activity Feed</span>
+                </div>
+              </div>
+              <div class="card-body">
+                <div class="activity-list" id="activity-feed-list">
+                  <div class="activity-item">
+                    <div class="activity-dot blue"></div>
+                    <div class="activity-time">10:15</div>
+                    <div class="activity-desc">Trip Completed: Route 72A finished by J. Doe.</div>
+                  </div>
+                  <div class="activity-item">
+                    <div class="activity-dot green"></div>
+                    <div class="activity-time">09:45</div>
+                    <div class="activity-desc">Trip Created: New ad-hoc delivery for Route 99.</div>
+                  </div>
+                  <div class="activity-item">
+                    <div class="activity-dot orange"></div>
+                    <div class="activity-time">09:20</div>
+                    <div class="activity-desc">Status Change: Veh-304 marked as 'Needs Inspection'.</div>
+                  </div>
+                  <div class="activity-item">
+                    <div class="activity-dot gray"></div>
+                    <div class="activity-time">08:00</div>
+                    <div class="activity-desc">System: Shift started. 42 vehicles active.</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+          </div>
+
+          <!-- RIGHT COLUMN (Alerts, Schedule, Expiries) -->
+          <div class="right-column">
+            
+            <!-- Critical Alerts -->
+            <div class="dashboard-card">
+              <div class="card-header">
+                <div class="card-title-box">
+                  <span class="material-symbols-outlined" style="color: #ef4444;">warning</span>
+                  <span class="card-title" style="color: #ef4444;">Critical Alerts</span>
+                </div>
+              </div>
+              <div class="card-body" id="alerts-container">
+                <div class="alert-box critical" onclick="openDetails('Veh-402: Tire Pressure Low', 'Alert Type: Critical Pressure Warning. Driver reported visual notification and alarm on highway I-95. Action: Rerouted to nearest maintenance station.')">
+                  <div class="alert-icon-box"><span class="material-symbols-outlined">warning</span></div>
+                  <div class="alert-text-block">
+                    <div class="alert-title">Veh-402: Tire Pressure Low</div>
+                    <div class="alert-desc">Driver reported issue on I-95.</div>
+                  </div>
+                </div>
+                <div class="alert-box critical" onclick="openDetails('Trip #882 Delayed', 'Alert Type: Delayed Freight Trip. Heavy traffic on bridge. Expected arrival missed by 45m. Recipient notified.')">
+                  <div class="alert-icon-box"><span class="material-symbols-outlined">schedule</span></div>
+                  <div class="alert-text-block">
+                    <div class="alert-title">Trip #882 Delayed</div>
+                    <div class="alert-desc">Expected arrival missed by 45m.</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Today's Schedule -->
+            <div class="dashboard-card">
+              <div class="card-header">
+                <div class="card-title-box">
+                  <span class="material-symbols-outlined">event_note</span>
+                  <span class="card-title">Today's Schedule</span>
+                </div>
+                <button class="schedule-add-btn" onclick="openModal('add-schedule-modal')">
+                  <span class="material-symbols-outlined" style="font-weight: bold;">add</span>
+                </button>
+              </div>
+              <div class="card-body" id="schedule-container">
+                <div class="schedule-item" onclick="openDetails('Scheduled Maint: Veh-115', 'Time: 11:00 AM. Location: Maintenance Bay 2. Scope: Full engine check, filter swap, and brake testing.')">
+                  <div class="schedule-left">
+                    <span class="schedule-time-badge">11:00 AM</span>
+                    <div class="schedule-title">Scheduled Maint: Veh-115</div>
+                    <div class="schedule-desc">Oil change & brake inspection. Bay 2.</div>
+                  </div>
+                  <div class="schedule-dot orange"></div>
+                </div>
+
+                <div class="schedule-item" onclick="openDetails('Dispatch: Route 44B', 'Time: 02:30 PM. Driver: S. Miller. Vehicle assignment: VAN-209. Goods: Medical supplies delivery.')">
+                  <div class="schedule-left">
+                    <span class="schedule-time-badge">02:30 PM</span>
+                    <div class="schedule-title">Dispatch: Route 44B</div>
+                    <div class="schedule-desc">Driver: S. Miller. Vehicle: Veh-209.</div>
+                  </div>
+                  <div class="schedule-dot blue"></div>
+                </div>
+
+                <div class="schedule-item done" onclick="openDetails('Morning Roll-call', 'Time: 08:00 AM. Daily staff meeting and safety briefing. Shift coordinator signed off at 08:15 AM.')">
+                  <div class="schedule-left">
+                    <span class="schedule-time-badge">08:00 AM</span>
+                    <div class="schedule-title">Morning Roll-call</div>
+                  </div>
+                  <div class="schedule-dot checkmark">
+                    <span class="material-symbols-outlined">check_circle</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Upcoming Expiries -->
+            <div class="dashboard-card">
+              <div class="card-header">
+                <div class="card-title-box">
+                  <span class="material-symbols-outlined">assignment_late</span>
+                  <span class="card-title">Upcoming Expiries</span>
+                </div>
+                <a href="#" class="expiry-view-all" onclick="triggerNavDevelopment('Documents')">View All</a>
+              </div>
+              <div class="card-body" id="expiries-container">
+                <div class="expiry-item" onclick="openDetails('Driver License: T. Smith', 'Document Class: Commercial Driver License. Expiry Date: July 24, 2026. Action status: Renewal papers submitted.')">
+                  <div class="expiry-icon-box orange">
+                    <span class="material-symbols-outlined">badge</span>
+                  </div>
+                  <div class="expiry-info">
+                    <div class="expiry-title">Driver License: T. Smith</div>
+                    <div class="expiry-desc">Expires in 12 days</div>
+                  </div>
+                </div>
+                <div class="expiry-item" onclick="openDetails('Registration: Veh-204', 'Document Class: Vehicle State Registration. Expiry Date: July 10, 2026. Action status: EXPIRATION WARNING. Urgent renewal required.')">
+                  <div class="expiry-icon-box red">
+                    <span class="material-symbols-outlined">description</span>
+                  </div>
+                  <div class="expiry-info">
+                    <div class="expiry-title">Reg: Veh-204</div>
+                    <div class="expiry-desc red">Expired 2 days ago!</div>
+                  </div>
+                </div>
+                <div class="expiry-item" onclick="openDetails('Insurance: Fleet Policy B', 'Document Class: Commercial Auto Liability Policy. Expiry Date: August 11, 2026. Action status: Under review by underwriters.')">
+                  <div class="expiry-icon-box blue">
+                    <span class="material-symbols-outlined">shield</span>
+                  </div>
+                  <div class="expiry-info">
+                    <div class="expiry-title">Insurance: Fleet Policy B</div>
+                    <div class="expiry-desc">Expires in 30 days</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+          </div>
+
+        </div>
+
+      </div>
+
+    </div>
+
+  </div>
+
+  <script>
+    // --- MOCK NOTIFICATIONS ---
+    let notifications = [
+      { id: 1, text: "Alert: Veh-402 tire pressure drops below threshold.", time: "10 mins ago", unread: true },
+      { id: 2, text: "Trip #882 bridge delay registered.", time: "30 mins ago", unread: true },
+      { id: 3, text: "License expiry reminder: T. Smith (CDL).", time: "3 hours ago", unread: false }
+    ];
+
+    // --- INITIALIZATION ---
+    window.addEventListener("DOMContentLoaded", () => {
+      renderNotificationsList();
+      
+      // Close dropdowns on outside click
+      document.addEventListener("click", (e) => {
+        closeAllDropdowns(e.target);
+      });
+    });
+
+    // --- TOAST ALERTS SYSTEM ---
+    function showToast(message, type = "success") {
+      const container = document.getElementById("toast-container");
+      const el = document.createElement("div");
+      el.className = `toast ${type}`;
+      
+      let icon = "info";
+      if (type === "success") icon = "check_circle";
+      if (type === "error") icon = "error";
+
+      el.innerHTML = `
+        <span class="material-symbols-outlined" style="font-size: 16px;">${icon}</span>
+        <span>${message}</span>
+      `;
+      container.appendChild(el);
+
+      setTimeout(() => {
+        el.style.opacity = "0";
+        el.style.transform = "translateY(-10px)";
+        setTimeout(() => el.remove(), 300);
+      }, 3000);
+    }
+
+    // --- SEARCH LOGIC ---
+    function handleSearch(val) {
+      const query = val.toLowerCase().trim();
+      if (!query) return;
+      showToast(`Searching for "${query}" across vehicles, trips, and drivers...`, "info");
+    }
+
+    function closeAllDropdowns(clickedElement = null) {
+      // Profile menu
+      const profileMenu = document.getElementById("profile-menu");
+      if (profileMenu && (!clickedElement || !clickedElement.closest(".profile-card"))) {
+        profileMenu.classList.remove("show");
+      }
+
+      // Notifications panel
+      const notifPanel = document.getElementById("notif-panel");
+      if (notifPanel && (!clickedElement || !clickedElement.closest(".notif-button") && !clickedElement.closest(".notif-panel"))) {
+        notifPanel.classList.remove("show");
+      }
+    }
+
+    // --- PROFILE MENU TOGGLE ---
+    function toggleProfileMenu(e) {
+      e.stopPropagation();
+      const menu = document.getElementById("profile-menu");
+      menu.classList.toggle("show");
+    }
+
+    // --- NOTIFICATION DRAWER TOGGLE ---
+    function toggleNotifications(e) {
+      e.stopPropagation();
+      const panel = document.getElementById("notif-panel");
+      panel.classList.toggle("show");
+    }
+
+    function renderNotificationsList() {
+      const container = document.getElementById("notifications-container");
+      const dot = document.getElementById("notif-dot");
+      container.innerHTML = "";
+
+      const unreadCount = notifications.filter(n => n.unread).length;
+      if (unreadCount > 0) {
+        dot.style.display = "block";
+      } else {
+        dot.style.display = "none";
+      }
+
+      if (notifications.length === 0) {
+        container.innerHTML = `<div style="padding: 20px; text-align: center; color: #94a3b8; font-size: 12px;">No notifications.</div>`;
+        return;
+      }
+
+      notifications.forEach(n => {
+        const div = document.createElement("div");
+        div.className = `notif-item ${n.unread ? 'unread' : ''}`;
+        div.onclick = () => markNotificationAsRead(n.id);
+
+        div.innerHTML = `
+          <div class="notif-item-dot" style="${n.unread ? '' : 'visibility: hidden;'}"></div>
+          <div class="notif-item-content">
+            <div class="notif-item-text">${n.text}</div>
+            <div class="notif-item-time">${n.time}</div>
+          </div>
+        `;
+        container.appendChild(div);
+      });
+    }
+
+    function markNotificationAsRead(id) {
+      const notif = notifications.find(n => n.id === id);
+      if (notif && notif.unread) {
+        notif.unread = false;
+        showToast("Marked notification as read", "info");
+        renderNotificationsList();
+      }
+    }
+
+    function markAllNotificationsRead() {
+      notifications.forEach(n => n.unread = false);
+      showToast("All notifications marked as read", "success");
+      renderNotificationsList();
+    }
+
+    // --- MAP FILTERING PINS ---
+    function filterMapPins(status, cardEl) {
+      // Toggle selection styling
+      const cards = document.querySelectorAll(".map-filter-card");
+      cards.forEach(c => c.classList.remove("selected"));
+      cardEl.classList.add("selected");
+
+      // Filter Map Pins
+      const pins = document.querySelectorAll(".map-pin");
+      pins.forEach(pin => {
+        if (pin.dataset.pinStatus === status) {
+          pin.style.display = "block";
+        } else {
+          pin.style.display = "none";
+        }
+      });
+      showToast(`Showing only ${status} pins on live map`, "info");
+    }
+
+    // --- SIDEBAR TOGGLE (MOBILE) ---
+    function toggleSidebar() {
+      const sidebar = document.getElementById("sidebar");
+      const overlay = document.getElementById("sidebar-overlay");
+      sidebar.classList.toggle("open");
+      overlay.classList.toggle("show");
+    }
+
+    // --- DEV BUTTON WARNINGS ---
+    function triggerNavDevelopment(moduleName) {
+      showToast(`"${moduleName}" module is under development. Connecting routes...`, "info");
+    }
+
+    function triggerRegionsMenu(e) {
+      e.stopPropagation();
+      showToast("Regions dropdown clicked. Filter map region under development.", "info");
+    }
+
+    function triggerLogout() {
+      showToast("Logging out of TransitOps Command Center...", "error");
+      setTimeout(() => {
+        location.reload();
+      }, 1000);
+    }
+
+    // --- MODAL HANDLING ---
+    function openModal(id) {
+      const overlay = document.getElementById(id);
+      overlay.classList.add("show");
+    }
+
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "Escape") {
+        document.querySelectorAll(".modal-overlay").forEach(m => m.classList.remove("show"));
+      }
+    });
+
+    function closeModal(id) {
+      const overlay = document.getElementById(id);
+      overlay.classList.remove("show");
+    }
+
+    // --- EVENT DETAILS POPUP ---
+    function openDetails(subject, description) {
+      document.getElementById("details-modal-subject").textContent = subject;
+      document.getElementById("details-modal-desc").textContent = description;
+      openModal("details-modal");
+    }
+
+    // --- HANDLE NEW SCHEDULE EVENT ---
+    function handleNewSchedule(e) {
+      e.preventDefault();
+      
+      const time = document.getElementById("sched-time").value;
+      const title = document.getElementById("sched-title").value;
+      const desc = document.getElementById("sched-desc").value;
+      const type = document.getElementById("sched-type").value;
+
+      // Add to Today's Schedule panel
+      const container = document.getElementById("schedule-container");
+      const itemDiv = document.createElement("div");
+      itemDiv.className = "schedule-item";
+      
+      let dotHtml = `<div class="schedule-dot ${type}"></div>`;
+      if (type === "green") {
+        dotHtml = `
+          <div class="schedule-dot checkmark">
+            <span class="material-symbols-outlined">check_circle</span>
+          </div>
+        `;
+      }
+
+      itemDiv.onclick = () => {
+        openDetails(title, `Time: ${time}. Notes: ${desc}`);
+      };
+
+      itemDiv.innerHTML = `
+        <div class="schedule-left">
+          <span class="schedule-time-badge">${time}</span>
+          <div class="schedule-title">${title}</div>
+          <div class="schedule-desc">${desc}</div>
+        </div>
+        ${dotHtml}
+      `;
+
+      // Prepend to schedule container
+      container.insertBefore(itemDiv, container.firstChild);
+      
+      // Close modal & reset
+      closeModal("add-schedule-modal");
+      document.getElementById("add-schedule-form").reset();
+      showToast("Successfully added new schedule item!", "success");
+
+      // Add activity to feed
+      const feed = document.getElementById("activity-feed-list");
+      const feedItem = document.createElement("div");
+      feedItem.className = "activity-item";
+      feedItem.innerHTML = `
+        <div class="activity-dot blue"></div>
+        <div class="activity-time">Just now</div>
+        <div class="activity-desc">Scheduled Event added: ${title}.</div>
+      `;
+      feed.insertBefore(feedItem, feed.firstChild);
+    }
+  </script>
+</body>
+</html>

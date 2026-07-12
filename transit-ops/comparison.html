@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Vehicle Comparison - TransitOps</title>
+  <link rel="stylesheet" href="css/styles.css">
+  <script src="https://unpkg.com/@phosphor-icons/web"></script>
+</head>
+<body>
+  <aside class="sidebar">
+    <div class="logo">
+      <div class="logo-icon"><i class="ph-fill ph-truck"></i></div>
+      <div class="logo-text">
+        <h1>TransitOps</h1>
+        <p>Fleet Management</p>
+      </div>
+    </div>
+    <nav class="nav">
+      <a href="#" class="nav-item"><i class="ph ph-squares-four"></i> Dashboard</a>
+      <a href="registry.html" class="nav-item active"><i class="ph ph-truck"></i> Vehicles</a>
+      <a href="#" class="nav-item"><i class="ph ph-user"></i> Drivers</a>
+      <a href="trips.html" class="nav-item"><i class="ph ph-git-merge"></i> Trips</a>
+      <a href="#" class="nav-item"><i class="ph ph-wrench"></i> Maintenance</a>
+      <a href="#" class="nav-item"><i class="ph ph-gas-pump"></i> Fuel/Expenses</a>
+      <a href="reports.html" class="nav-item"><i class="ph ph-chart-bar"></i> Reports</a>
+      <a href="#" class="nav-item"><i class="ph ph-calendar-blank"></i> Calendar</a>
+      <a href="#" class="nav-item"><i class="ph ph-file-text"></i> Documents</a>
+    </nav>
+    <div class="sidebar-footer" style="border-top: none; padding-bottom: 24px;">
+      <a href="settings.html" class="nav-item" style="padding: 0; margin-bottom: 20px; width: 100%;"><i class="ph ph-gear"></i> Settings</a>
+    </div>
+  </aside>
+
+  <main class="main">
+    <header class="header">
+      <div class="search">
+        <i class="ph ph-magnifying-glass"></i>
+        <input type="text" placeholder="Search vehicles, drivers, or trips...">
+      </div>
+      <div class="header-actions">
+        <div class="notification">
+          <i class="ph ph-bell"></i>
+          <span class="notification-dot"></span>
+        </div>
+        <button class="profile-btn">
+          <img src="https://ui-avatars.com/api/?name=Admin+User&background=0D8ABC&color=fff" alt="Profile">
+        </button>
+      </div>
+    </header>
+
+    <div class="content">
+      <div class="page-header" style="margin-bottom: 32px;">
+        <div class="page-title">
+          <h2 style="font-size:28px;">Vehicle Comparison</h2>
+          <p>Evaluate performance, cost, and efficiency side-by-side.</p>
+        </div>
+        <div class="page-actions">
+          <button class="btn btn-secondary"><i class="ph ph-download-simple"></i> Export Report</button>
+        </div>
+      </div>
+
+      <div class="card" style="padding:0; overflow:hidden;">
+        <!-- Header Row with Selectors -->
+        <div style="display:grid; grid-template-columns: 260px 1fr 1fr; border-bottom:1px solid var(--border-color); position:relative;">
+           <div style="padding:24px; display:flex; align-items:center; justify-content:center; background:#f8fafc; font-size:11px; font-weight:700; color:var(--text-gray); letter-spacing:0.5px; border-right:1px solid var(--border-color);">
+              COMPARISON METRICS
+           </div>
+           
+           <!-- Vehicle A Selector -->
+           <div style="padding:24px 32px; border-right:1px solid var(--border-color);">
+             <label style="font-size:11px; color:var(--text-gray); font-weight:600; display:block; margin-bottom:8px;">Vehicle A</label>
+             <div class="input-field" style="margin-bottom:16px; justify-content:space-between; cursor:pointer; font-weight:500;">
+                Ford Transit 350 - V-1042 <i class="ph ph-caret-down"></i>
+             </div>
+             <div style="display:flex; gap:16px;">
+                <div style="width:100px; height:60px; background:#e2e8f0; border-radius:6px; display:flex; align-items:center; justify-content:center; overflow:hidden;">
+                   <i class="ph ph-van" style="font-size:32px; color:var(--text-gray);"></i>
+                </div>
+                <div>
+                  <div style="font-size:13px; color:var(--text-dark); margin-bottom:8px;">2022 Model Year</div>
+                  <span class="badge badge-blue" style="font-weight:500;">Active</span>
+                </div>
+             </div>
+           </div>
+
+           <!-- VS Badge -->
+           <div style="position:absolute; left:calc(260px + (100% - 260px)/2); top:36px; transform:translate(-50%, -50%); background:white; width:32px; height:32px; border-radius:50%; display:flex; align-items:center; justify-content:center; border:1px solid var(--border-color); font-size:12px; font-weight:700; color:var(--text-gray); box-shadow:0 2px 4px rgba(0,0,0,0.05); z-index:10;">
+             VS
+           </div>
+
+           <!-- Vehicle B Selector -->
+           <div style="padding:24px 32px;">
+             <label style="font-size:11px; color:var(--text-gray); font-weight:600; display:block; margin-bottom:8px;">Vehicle B</label>
+             <div class="input-field" style="margin-bottom:16px; justify-content:space-between; cursor:pointer; font-weight:500;">
+                Mercedes Sprinter - V-1088 <i class="ph ph-caret-down"></i>
+             </div>
+             <div style="display:flex; gap:16px;">
+                <div style="width:100px; height:60px; background:#e2e8f0; border-radius:6px; display:flex; align-items:center; justify-content:center; overflow:hidden;">
+                   <i class="ph ph-van" style="font-size:32px; color:var(--text-gray);"></i>
+                </div>
+                <div>
+                  <div style="font-size:13px; color:var(--text-dark); margin-bottom:8px;">2023 Model Year</div>
+                  <span class="badge badge-blue" style="font-weight:500;">Active</span>
+                </div>
+             </div>
+           </div>
+        </div>
+
+        <!-- Section Header -->
+        <div style="padding:12px 24px; background:#f8fafc; font-size:11px; font-weight:700; color:var(--text-gray); letter-spacing:0.5px; border-bottom:1px solid var(--border-color);">
+           EFFICIENCY & USAGE
+        </div>
+
+        <!-- Row 1 -->
+        <div style="display:grid; grid-template-columns: 260px 1fr 1fr; border-bottom:1px solid var(--border-color);">
+           <div style="padding:24px; display:flex; align-items:center; gap:12px; border-right:1px solid var(--border-color); font-size:13px; font-weight:600; color:var(--text-dark);">
+              <i class="ph ph-gas-pump" style="font-size:18px; color:var(--text-gray);"></i> Fuel Efficiency
+           </div>
+           <div style="padding:24px 32px; border-right:1px solid var(--border-color); display:flex; justify-content:space-between; align-items:center;">
+             <div><span style="font-size:20px; font-weight:700;">18.5</span> <span style="color:var(--text-gray); font-size:13px;">MPG</span></div>
+             <i class="ph-fill ph-check-circle" style="color:var(--primary-color); font-size:20px;"></i>
+           </div>
+           <div style="padding:24px 32px;">
+             <div><span style="font-size:20px; font-weight:700;">15.2</span> <span style="color:var(--text-gray); font-size:13px;">MPG</span></div>
+           </div>
+        </div>
+
+        <!-- Row 2 -->
+        <div style="display:grid; grid-template-columns: 260px 1fr 1fr; border-bottom:1px solid var(--border-color);">
+           <div style="padding:24px; display:flex; align-items:center; gap:12px; border-right:1px solid var(--border-color); font-size:13px; font-weight:600; color:var(--text-dark);">
+              <i class="ph ph-git-merge" style="font-size:18px; color:var(--text-gray);"></i> Trips Completed
+           </div>
+           <div style="padding:24px 32px; border-right:1px solid var(--border-color);">
+             <div style="font-size:20px; font-weight:700;">142</div>
+           </div>
+           <div style="padding:24px 32px; display:flex; justify-content:space-between; align-items:center;">
+             <div style="font-size:20px; font-weight:700;">187</div>
+             <i class="ph-fill ph-check-circle" style="color:var(--primary-color); font-size:20px;"></i>
+           </div>
+        </div>
+
+        <!-- Section Header -->
+        <div style="padding:12px 24px; background:#f8fafc; font-size:11px; font-weight:700; color:var(--text-gray); letter-spacing:0.5px; border-bottom:1px solid var(--border-color);">
+           COST & FINANCIALS
+        </div>
+
+        <!-- Row 3 -->
+        <div style="display:grid; grid-template-columns: 260px 1fr 1fr; border-bottom:1px solid var(--border-color);">
+           <div style="padding:24px; display:flex; align-items:center; gap:12px; border-right:1px solid var(--border-color); font-size:13px; font-weight:600; color:var(--text-dark);">
+              <i class="ph ph-wrench" style="font-size:18px; color:var(--text-gray);"></i> Maintenance Cost
+           </div>
+           <div style="padding:24px 32px; border-right:1px solid var(--border-color);">
+             <div><span style="font-size:20px; font-weight:700;">$0.18</span> <span style="color:var(--text-gray); font-size:13px;">/ mi</span></div>
+           </div>
+           <div style="padding:24px 32px; display:flex; justify-content:space-between; align-items:center;">
+             <div><span style="font-size:20px; font-weight:700;">$0.12</span> <span style="color:var(--text-gray); font-size:13px;">/ mi</span></div>
+             <i class="ph-fill ph-check-circle" style="color:var(--primary-color); font-size:20px;"></i>
+           </div>
+        </div>
+
+        <!-- Row 4 -->
+        <div style="display:grid; grid-template-columns: 260px 1fr 1fr; border-bottom:1px solid var(--border-color);">
+           <div style="padding:24px; display:flex; align-items:center; gap:12px; border-right:1px solid var(--border-color); font-size:13px; font-weight:600; color:var(--text-dark);">
+              <i class="ph ph-money" style="font-size:18px; color:var(--text-gray);"></i> Operational Cost
+           </div>
+           <div style="padding:24px 32px; border-right:1px solid var(--border-color); display:flex; justify-content:space-between; align-items:center;">
+             <div><span style="font-size:20px; font-weight:700;">$3,240</span> <span style="color:var(--text-gray); font-size:13px;">/ mo</span></div>
+             <i class="ph-fill ph-check-circle" style="color:var(--primary-color); font-size:20px;"></i>
+           </div>
+           <div style="padding:24px 32px;">
+             <div><span style="font-size:20px; font-weight:700;">$3,890</span> <span style="color:var(--text-gray); font-size:13px;">/ mo</span></div>
+           </div>
+        </div>
+
+        <!-- Row 5 -->
+        <div style="display:grid; grid-template-columns: 260px 1fr 1fr;">
+           <div style="padding:24px; display:flex; align-items:center; gap:12px; border-right:1px solid var(--border-color); font-size:13px; font-weight:600; color:var(--text-dark);">
+              <i class="ph ph-trend-up" style="font-size:18px; color:var(--text-gray);"></i> Est. Monthly ROI
+           </div>
+           <div style="padding:24px 32px; border-right:1px solid var(--border-color);">
+             <div style="font-size:20px; font-weight:700;">12.4%</div>
+           </div>
+           <div style="padding:24px 32px; display:flex; justify-content:space-between; align-items:center;">
+             <div style="font-size:20px; font-weight:700;">15.8%</div>
+             <i class="ph-fill ph-check-circle" style="color:var(--primary-color); font-size:20px;"></i>
+           </div>
+        </div>
+
+      </div>
+    </div>
+  </main>
+</body>
+</html>

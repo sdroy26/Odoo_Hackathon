@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Settings - TransitOps</title>
+  <link rel="stylesheet" href="css/styles.css">
+  <script src="https://unpkg.com/@phosphor-icons/web"></script>
+</head>
+<body>
+  <aside class="sidebar">
+    <div class="logo">
+      <div class="logo-icon"><i class="ph-fill ph-truck"></i></div>
+      <div class="logo-text">
+        <h1>TransitOps</h1>
+        <p>Fleet Management</p>
+      </div>
+    </div>
+    <nav class="nav">
+      <a href="#" class="nav-item"><i class="ph ph-squares-four"></i> Dashboard</a>
+      <a href="registry.html" class="nav-item"><i class="ph ph-truck"></i> Vehicles</a>
+      <a href="#" class="nav-item"><i class="ph ph-user"></i> Drivers</a>
+      <a href="trips.html" class="nav-item"><i class="ph ph-git-merge"></i> Trips</a>
+      <a href="#" class="nav-item"><i class="ph ph-wrench"></i> Maintenance</a>
+      <a href="#" class="nav-item"><i class="ph ph-gas-pump"></i> Fuel/Expenses</a>
+      <a href="reports.html" class="nav-item"><i class="ph ph-chart-bar"></i> Reports</a>
+      <a href="#" class="nav-item"><i class="ph ph-calendar-blank"></i> Calendar</a>
+      <a href="#" class="nav-item"><i class="ph ph-file-text"></i> Documents</a>
+    </nav>
+    <div class="sidebar-footer" style="padding:0; border:none; display:block;">
+       <a href="settings.html" class="nav-item active"><i class="ph ph-gear"></i> Settings</a>
+    </div>
+    <div class="sidebar-footer" style="margin-top:auto;">
+      <div class="user-avatar-text">AD</div>
+      <div class="user-info">
+        <h4>Admin User</h4>
+        <p>Fleet Manager</p>
+      </div>
+    </div>
+  </aside>
+
+  <main class="main">
+    <header class="header">
+      <div class="search">
+        <i class="ph ph-magnifying-glass"></i>
+        <input type="text" placeholder="Search resources, users, vehicles...">
+      </div>
+      <div class="header-actions">
+        <div class="notification">
+          <i class="ph ph-bell"></i>
+          <span class="notification-dot"></span>
+        </div>
+        <button class="profile-btn">
+          <img src="https://ui-avatars.com/api/?name=Admin+User&background=0D8ABC&color=fff" alt="Profile">
+        </button>
+      </div>
+    </header>
+
+    <div class="content">
+      <div class="page-header" style="margin-bottom: 32px;">
+        <div class="page-title">
+          <h2 style="font-size: 28px;">Settings</h2>
+          <p>Manage users, roles, and review system activity.</p>
+        </div>
+      </div>
+
+      <div class="card" style="padding:0;">
+        <div class="tabs" style="padding: 0 24px;">
+          <div class="tab active"><i class="ph ph-users"></i> User Management</div>
+          <div class="tab"><i class="ph ph-shield-check"></i> Role Management</div>
+          <div class="tab"><i class="ph ph-clock-counter-clockwise"></i> Audit Logs</div>
+        </div>
+        
+        <div style="padding: 24px; display:flex; justify-content:space-between; align-items:center; border-bottom: 1px solid var(--border-color);">
+           <div class="search" style="width: 320px; background:white; border:1px solid var(--border-color);">
+             <i class="ph ph-magnifying-glass"></i>
+             <input type="text" placeholder="Search users by name or email">
+           </div>
+           <button class="btn btn-primary"><i class="ph ph-user-plus"></i> Invite User</button>
+        </div>
+
+        <table>
+          <thead>
+            <tr>
+              <th style="padding-left:32px;">User</th>
+              <th>Role</th>
+              <th>Status</th>
+              <th>Last Login</th>
+              <th style="text-align:right; padding-right:32px;">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td style="padding-left:32px;">
+                <div style="display:flex; align-items:center; gap:16px;">
+                  <div class="user-avatar-text" style="background:#e0e7ff; color:#3730a3; width:40px; height:40px;">EJ</div>
+                  <div>
+                    <div style="font-weight:600; color:var(--text-dark); margin-bottom:2px;">Elena Jensen</div>
+                    <div style="font-size:12px; color:var(--text-gray);">elena.j@transitops.com</div>
+                  </div>
+                </div>
+              </td>
+              <td><span class="badge badge-blue">Admin</span></td>
+              <td><div style="display:flex; align-items:center; color:var(--primary-color); font-weight:500; font-size:13px;"><span class="status-dot active" style="margin-right:8px;"></span> Active</div></td>
+              <td style="color:var(--text-gray); font-family:monospace; font-size:12px;">2 hours ago</td>
+              <td style="text-align:right; padding-right:32px;">
+                <button class="btn-icon"><i class="ph ph-pencil-simple"></i></button>
+                <button class="btn-icon"><i class="ph ph-trash"></i></button>
+              </td>
+            </tr>
+            <tr>
+              <td style="padding-left:32px;">
+                <div style="display:flex; align-items:center; gap:16px;">
+                  <div class="user-avatar-text" style="background:#ffedd5; color:#c2410c; width:40px; height:40px;">MR</div>
+                  <div>
+                    <div style="font-weight:600; color:var(--text-dark); margin-bottom:2px;">Marcus Reed</div>
+                    <div style="font-size:12px; color:var(--text-gray);">m.reed@transitops.com</div>
+                  </div>
+                </div>
+              </td>
+              <td><span class="badge badge-blue">Dispatcher</span></td>
+              <td><div style="display:flex; align-items:center; color:var(--primary-color); font-weight:500; font-size:13px;"><span class="status-dot active" style="margin-right:8px;"></span> Active</div></td>
+              <td style="color:var(--text-gray); font-family:monospace; font-size:12px;">1 day ago</td>
+              <td style="text-align:right; padding-right:32px;">
+                <button class="btn-icon"><i class="ph ph-pencil-simple"></i></button>
+                <button class="btn-icon"><i class="ph ph-trash"></i></button>
+              </td>
+            </tr>
+            <tr>
+              <td style="padding-left:32px;">
+                <div style="display:flex; align-items:center; gap:16px;">
+                  <div class="user-avatar-text" style="background:#e2e8f0; color:#475569; width:40px; height:40px;">SL</div>
+                  <div>
+                    <div style="font-weight:600; color:var(--text-dark); margin-bottom:2px;">Sarah Lin</div>
+                    <div style="font-size:12px; color:var(--text-gray);">slin.contractor@transitops.com</div>
+                  </div>
+                </div>
+              </td>
+              <td><span class="badge badge-blue">Manager</span></td>
+              <td><div style="display:flex; align-items:center; color:var(--text-gray); font-weight:500; font-size:13px;"><span class="status-dot offline" style="margin-right:8px;"></span> Offline</div></td>
+              <td style="color:var(--text-gray); font-family:monospace; font-size:12px;">Oct 12, 2023</td>
+              <td style="text-align:right; padding-right:32px;">
+                <button class="btn-icon"><i class="ph ph-pencil-simple"></i></button>
+                <button class="btn-icon"><i class="ph ph-trash"></i></button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+        <div style="padding: 16px 24px; display:flex; justify-content:space-between; align-items:center; font-size:13px; color:var(--text-gray);">
+           Showing 1 to 3 of 24 users
+           <div style="display:flex; gap:8px;">
+             <button class="btn btn-secondary" style="padding:6px 12px; font-weight:500; color:var(--text-gray);" disabled>Prev</button>
+             <button class="btn btn-secondary" style="padding:6px 12px; font-weight:500;">Next</button>
+           </div>
+        </div>
+      </div>
+    </div>
+  </main>
+</body>
+</html>

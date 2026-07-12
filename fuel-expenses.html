@@ -1,0 +1,1214 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Fuel & Expenses - TransitOps Fleet Management</title>
+  <!-- Google Fonts & Material Symbols -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet" />
+  
+  <style>
+    /* RESET & BASE */
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    body {
+      font-family: 'Inter', sans-serif;
+      background-color: #f8fafc;
+      color: #0f172a;
+      height: 100vh;
+      overflow: hidden;
+      display: flex;
+    }
+    
+    /* SCROLLBARS */
+    .custom-scrollbar::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-track {
+      background: transparent;
+    }
+    .custom-scrollbar::-webkit-scrollbar-thumb {
+      background: #cbd5e1;
+      border-radius: 4px;
+    }
+    .custom-scrollbar:hover::-webkit-scrollbar-thumb {
+      background: #94a3b8;
+    }
+
+    /* TOAST ALERTS */
+    #toast-container {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      z-index: 9999;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .toast {
+      background: #1e293b;
+      color: #ffffff;
+      padding: 12px 20px;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 500;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      transform: translateY(-20px);
+      opacity: 0;
+      animation: toastIn 0.3s forwards;
+      transition: opacity 0.3s, transform 0.3s;
+    }
+    @keyframes toastIn {
+      to {
+        transform: translateY(0);
+        opacity: 1;
+      }
+    }
+    .toast.success { background-color: #059669; }
+    .toast.info { background-color: #2563eb; }
+
+    /* LAYOUT PATTERN */
+    .app-container {
+      display: flex;
+      width: 100vw;
+      height: 100vh;
+      position: relative;
+    }
+
+    /* SIDEBAR (Left) */
+    .sidebar {
+      width: 250px;
+      background: #ffffff;
+      border-right: 1px solid #e2e8f0;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      padding: 24px 16px;
+      flex-shrink: 0;
+      z-index: 100;
+      transition: transform 0.3s ease;
+    }
+    .sidebar-logo {
+      margin-bottom: 32px;
+      padding-left: 8px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .sidebar-logo-icon {
+      width: 32px;
+      height: 32px;
+      border-radius: 6px;
+      background: #0f172a;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #ffffff;
+    }
+    .sidebar-logo-icon span {
+      font-size: 20px;
+    }
+    .sidebar-logo-text h1 {
+      font-size: 16px;
+      font-weight: 700;
+      color: #0f172a;
+      line-height: 1.2;
+    }
+    .sidebar-logo-text p {
+      font-size: 10px;
+      font-weight: 500;
+      color: #64748b;
+      margin-top: 1px;
+    }
+    .sidebar-nav {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      flex-grow: 1;
+      overflow-y: auto;
+    }
+    .nav-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 10px 12px;
+      border-radius: 8px;
+      text-decoration: none;
+      color: #475569;
+      font-size: 14px;
+      font-weight: 500;
+      transition: background 0.15s, color 0.15s;
+    }
+    .nav-item:hover {
+      background: #f1f5f9;
+      color: #0f172a;
+    }
+    .nav-item.active {
+      background: #eff6ff;
+      color: #2563eb;
+      font-weight: 600;
+    }
+    .nav-item .material-symbols-outlined {
+      font-size: 20px;
+    }
+    .sidebar-bottom {
+      border-top: 1px solid #f1f5f9;
+      padding-top: 16px;
+      margin-top: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    /* MAIN VIEW CONTAINER */
+    .main-view {
+      display: flex;
+      flex-direction: column;
+      flex-grow: 1;
+      height: 100%;
+      overflow: hidden;
+    }
+
+    /* TOP HEADER */
+    .header {
+      height: 64px;
+      background: #ffffff;
+      border-bottom: 1px solid #e2e8f0;
+      padding: 0 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-shrink: 0;
+      z-index: 90;
+    }
+    .menu-trigger {
+      display: none;
+      background: none;
+      border: none;
+      cursor: pointer;
+      color: #475569;
+      margin-right: 12px;
+    }
+    .search-wrapper {
+      position: relative;
+      max-width: 360px;
+      width: 100%;
+    }
+    .search-icon {
+      position: absolute;
+      left: 14px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: #94a3b8;
+      font-size: 20px;
+      pointer-events: none;
+    }
+    .search-input {
+      width: 100%;
+      height: 38px;
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 9999px;
+      padding: 0 16px 0 42px;
+      font-size: 13px;
+      color: #0f172a;
+      outline: none;
+      transition: border-color 0.15s, box-shadow 0.15s, background-color 0.15s;
+    }
+    .search-input:focus {
+      border-color: #2563eb;
+      background-color: #ffffff;
+      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+    }
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+    .notif-button {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background: none;
+      border: none;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #475569;
+      cursor: pointer;
+      position: relative;
+      transition: background 0.15s;
+    }
+    .notif-button:hover {
+      background: #f1f5f9;
+      color: #0f172a;
+    }
+    .notif-dot {
+      position: absolute;
+      top: 6px;
+      right: 6px;
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #ef4444;
+      border: 2px solid #ffffff;
+    }
+    .header-divider {
+      width: 1px;
+      height: 24px;
+      background: #e2e8f0;
+    }
+    .header-user-profile {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .header-avatar {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      object-fit: cover;
+    }
+    .header-user-info {
+      display: flex;
+      flex-direction: column;
+    }
+    .header-username {
+      font-size: 12px;
+      font-weight: 600;
+      color: #0f172a;
+    }
+    .header-userrole {
+      font-size: 10px;
+      color: #64748b;
+    }
+    
+    /* NOTIFICATIONS PANEL */
+    .notif-panel {
+      position: absolute;
+      top: 56px;
+      right: 140px;
+      width: 300px;
+      background: #ffffff;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+      display: none;
+      flex-direction: column;
+      z-index: 150;
+      max-height: 400px;
+    }
+    .notif-panel.show {
+      display: flex;
+    }
+    .notif-header {
+      padding: 12px 16px;
+      border-bottom: 1px solid #f1f5f9;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .notif-header h4 {
+      font-size: 13px;
+      font-weight: 600;
+    }
+    .notif-clear {
+      font-size: 11px;
+      color: #2563eb;
+      background: none;
+      border: none;
+      cursor: pointer;
+    }
+    .notif-list {
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+    }
+    .notif-item {
+      padding: 12px 16px;
+      border-bottom: 1px solid #f1f5f9;
+      display: flex;
+      gap: 10px;
+      align-items: flex-start;
+      cursor: pointer;
+    }
+    .notif-item:hover {
+      background: #f8fafc;
+    }
+    .notif-item-text {
+      font-size: 11px;
+      color: #334155;
+      line-height: 1.4;
+    }
+
+    /* FUEL CONTENT */
+    .fuel-workspace {
+      flex: 1;
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      overflow-y: auto;
+    }
+    .title-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 24px;
+    }
+    .title-info h2 {
+      font-size: 24px;
+      font-weight: 700;
+      color: #0f172a;
+    }
+    .title-info p {
+      font-size: 13px;
+      color: #64748b;
+      margin-top: 4px;
+    }
+    
+    .actions-right {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    
+    /* BUTTONS */
+    .btn {
+      height: 38px;
+      padding: 0 16px;
+      font-size: 13px;
+      font-weight: 600;
+      border-radius: 6px;
+      border: 1px solid transparent;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      transition: background 0.15s, border-color 0.15s;
+    }
+    .btn-secondary {
+      background: #ffffff;
+      border-color: #cbd5e1;
+      color: #2563eb;
+    }
+    .btn-secondary:hover {
+      background: #f0f7ff;
+    }
+    .btn-primary {
+      background: #2563eb;
+      color: #ffffff;
+    }
+    .btn-primary:hover {
+      background: #1d4ed8;
+    }
+
+    /* KPI CARDS (3 Columns) */
+    .kpi-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+    .kpi-card {
+      background: #ffffff;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+      padding: 16px;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      min-height: 100px;
+    }
+    .kpi-label {
+      font-size: 10px;
+      font-weight: 700;
+      color: #64748b;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 8px;
+    }
+    .kpi-value-row {
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+    }
+    .kpi-value {
+      font-size: 28px;
+      font-weight: 700;
+      color: #0f172a;
+      line-height: 1.1;
+    }
+    .kpi-trend {
+      font-size: 12px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      margin-bottom: 3px;
+    }
+    .kpi-trend.red {
+      color: #ef4444; /* spend increase is red */
+    }
+    .kpi-trend.green {
+      color: #10b981; /* fuel decrease is green */
+    }
+    .kpi-comparison-text {
+      font-size: 12px;
+      color: #64748b;
+      margin-bottom: 3px;
+      font-weight: 500;
+    }
+
+    /* TABS */
+    .tabs-row {
+      display: flex;
+      border-bottom: 1px solid #e2e8f0;
+      margin-bottom: 16px;
+    }
+    .tab-btn {
+      padding: 10px 20px;
+      font-size: 13px;
+      font-weight: 600;
+      color: #64748b;
+      background: none;
+      border: none;
+      border-bottom: 2px solid transparent;
+      cursor: pointer;
+      transition: color 0.15s, border-color 0.15s;
+    }
+    .tab-btn:hover {
+      color: #0f172a;
+    }
+    .tab-btn.active {
+      color: #2563eb;
+      border-bottom-color: #2563eb;
+    }
+
+    /* TABLE */
+    .table-container {
+      background: #ffffff;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+      overflow: hidden;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
+    }
+    .data-table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: left;
+    }
+    .data-table th {
+      background: #f8fafc;
+      padding: 14px 16px;
+      font-size: 11px;
+      font-weight: 600;
+      color: #64748b;
+      border-bottom: 1px solid #e2e8f0;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    .data-table td {
+      padding: 16px;
+      font-size: 13px;
+      color: #334155;
+      border-bottom: 1px solid #e2e8f0;
+    }
+    .td-bold-black {
+      font-weight: 600;
+      color: #0f172a;
+    }
+    
+    /* MODALS */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(15, 23, 42, 0.4);
+      backdrop-filter: blur(4px);
+      z-index: 1000;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+    }
+    .modal-overlay.show {
+      display: flex;
+    }
+    .modal {
+      background: #ffffff;
+      border-radius: 12px;
+      width: 100%;
+      max-width: 440px;
+      box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      animation: modalScale 0.25s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+    }
+    @keyframes modalScale {
+      from { transform: scale(0.95); opacity: 0; }
+      to { transform: scale(1); opacity: 1; }
+    }
+    .modal-header {
+      padding: 16px 20px;
+      border-bottom: 1px solid #e2e8f0;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .modal-header h3 {
+      font-size: 16px;
+      font-weight: 700;
+      color: #0f172a;
+    }
+    .modal-close {
+      background: none;
+      border: none;
+      color: #94a3b8;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      transition: background 0.15s;
+    }
+    .modal-close:hover {
+      background: #f1f5f9;
+      color: #0f172a;
+    }
+    .modal-body {
+      padding: 20px;
+    }
+    .modal-footer {
+      padding: 12px 20px;
+      border-top: 1px solid #e2e8f0;
+      display: flex;
+      justify-content: flex-end;
+      gap: 8px;
+      background: #f8fafc;
+    }
+    
+    /* FORM INPUTS */
+    .form-group {
+      margin-bottom: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    .form-label {
+      font-size: 11px;
+      font-weight: 600;
+      color: #64748b;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    .form-input, .form-select {
+      width: 100%;
+      padding: 8px 12px;
+      font-size: 13px;
+      border: 1px solid #e2e8f0;
+      border-radius: 6px;
+      outline: none;
+      font-family: inherit;
+    }
+    .form-input:focus, .form-select:focus {
+      border-color: #2563eb;
+      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+    }
+    
+    .btn-secondary-modal {
+      background: #ffffff;
+      border: 1px solid #e2e8f0;
+      color: #475569;
+      font-weight: 600;
+    }
+    .btn-secondary-modal:hover {
+      background: #f8fafc;
+    }
+    .btn-save {
+      background: #2563eb;
+      color: #ffffff;
+      font-weight: 600;
+    }
+    .btn-save:hover {
+      background: #1d4ed8;
+    }
+
+    /* RESPONSIVE */
+    @media (max-width: 1024px) {
+      .kpi-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+    @media (max-width: 768px) {
+      .menu-trigger {
+        display: block;
+      }
+      .sidebar {
+        position: fixed;
+        left: 0;
+        top: 0;
+        bottom: 0;
+        transform: translateX(-100%);
+      }
+      .sidebar.open {
+        transform: translateX(0);
+      }
+      .sidebar-overlay {
+        position: fixed;
+        inset: 0;
+        background: rgba(15, 23, 42, 0.4);
+        z-index: 99;
+        display: none;
+      }
+      .sidebar-overlay.show {
+        display: block;
+      }
+      .kpi-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- TOAST NOTIFICATION CONTAINER -->
+  <div id="toast-container"></div>
+
+  <!-- MODAL: LOG FUEL -->
+  <div class="modal-overlay" id="log-fuel-modal">
+    <div class="modal">
+      <form id="log-fuel-form" onsubmit="handleFuelLog(event)">
+        <div class="modal-header">
+          <h3>Log Refueling Entry</h3>
+          <button type="button" class="modal-close" onclick="closeModal('log-fuel-modal')">
+            <span class="material-symbols-outlined">close</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          <div class="form-group">
+            <label class="form-label" for="fuel-id">Vehicle ID</label>
+            <input type="text" class="form-input" id="fuel-id" placeholder="e.g. TRK-104" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="fuel-date">Date & Time</label>
+            <input type="text" class="form-input" id="fuel-date" placeholder="e.g. Oct 24, 2023 08:30" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="fuel-liters">Liters</label>
+            <input type="text" class="form-input" id="fuel-liters" placeholder="e.g. 120 L" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="fuel-cost">Cost</label>
+            <input type="text" class="form-input" id="fuel-cost" placeholder="e.g. $185.40" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="fuel-driver">Driver</label>
+            <input type="text" class="form-input" id="fuel-driver" placeholder="e.g. J. Doe" required>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary-modal" onclick="closeModal('log-fuel-modal')">Cancel</button>
+          <button type="submit" class="btn btn-save">Log Entry</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL: ADD EXPENSE -->
+  <div class="modal-overlay" id="add-expense-modal">
+    <div class="modal">
+      <form id="add-expense-form" onsubmit="handleExpenseAdd(event)">
+        <div class="modal-header">
+          <h3>Add General Expense</h3>
+          <button type="button" class="modal-close" onclick="closeModal('add-expense-modal')">
+            <span class="material-symbols-outlined">close</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          <div class="form-group">
+            <label class="form-label" for="exp-id">Vehicle ID / entity</label>
+            <input type="text" class="form-input" id="exp-id" placeholder="e.g. TRK-9021" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="exp-date">Date</label>
+            <input type="text" class="form-input" id="exp-date" placeholder="e.g. Oct 22, 2023" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="exp-cat">Category / Description</label>
+            <input type="text" class="form-input" id="exp-cat" placeholder="e.g. Tire Replacement" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="exp-cost">Cost</label>
+            <input type="text" class="form-input" id="exp-cost" placeholder="e.g. $450.00" required>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary-modal" onclick="closeModal('add-expense-modal')">Cancel</button>
+          <button type="submit" class="btn btn-save">Add Expense</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div class="app-container">
+
+    <!-- MOBILE SIDEBAR OVERLAY -->
+    <div class="sidebar-overlay" id="sidebar-overlay" onclick="toggleSidebar()"></div>
+
+    <!-- SIDEBAR -->
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-logo">
+        <div class="sidebar-logo-icon">
+          <span class="material-symbols-outlined">local_shipping</span>
+        </div>
+        <div class="sidebar-logo-text">
+          <h1>TransitOps</h1>
+          <p>Fleet Management</p>
+        </div>
+      </div>
+
+      <nav class="sidebar-nav">
+        <a href="dashboard.html" class="nav-item">
+          <span class="material-symbols-outlined">dashboard</span>
+          Dashboard
+        </a>
+        <a href="vehicle-registry.html" class="nav-item">
+          <span class="material-symbols-outlined">local_shipping</span>
+          Vehicles
+        </a>
+        <a href="#" class="nav-item" onclick="triggerNavDevelopment('Drivers')">
+          <span class="material-symbols-outlined">person</span>
+          Drivers
+        </a>
+        <a href="#" class="nav-item" onclick="triggerNavDevelopment('Trips')">
+          <span class="material-symbols-outlined">route</span>
+          Trips
+        </a>
+        <a href="#" class="nav-item" onclick="triggerNavDevelopment('Maintenance')">
+          <span class="material-symbols-outlined">build</span>
+          Maintenance
+        </a>
+        <a href="fuel-expenses.html" class="nav-item active">
+          <span class="material-symbols-outlined">local_gas_station</span>
+          Fuel/Expenses
+        </a>
+        <a href="#" class="nav-item" onclick="triggerNavDevelopment('Reports')">
+          <span class="material-symbols-outlined">bar_chart</span>
+          Reports
+        </a>
+        <a href="fleet-calendar.html" class="nav-item">
+          <span class="material-symbols-outlined">calendar_today</span>
+          Calendar
+        </a>
+        <a href="fleet-documents.html" class="nav-item">
+          <span class="material-symbols-outlined">description</span>
+          Documents
+        </a>
+      </nav>
+
+      <div class="sidebar-bottom">
+        <a href="#" class="nav-item" onclick="triggerNavDevelopment('Settings')">
+          <span class="material-symbols-outlined">settings</span>
+          Settings
+        </a>
+      </div>
+    </aside>
+
+    <!-- MAIN VIEW -->
+    <div class="main-view">
+      
+      <!-- TOP HEADER -->
+      <header class="header">
+        <div style="display: flex; align-items: center; width: 100%;">
+          <button class="menu-trigger" onclick="toggleSidebar()">
+            <span class="material-symbols-outlined">menu</span>
+          </button>
+          
+          <div class="search-wrapper">
+            <span class="material-symbols-outlined search-icon">search</span>
+            <input 
+              type="text" 
+              class="search-input" 
+              placeholder="Search..."
+              id="search-box"
+              oninput="handleSearch(this.value)"
+            >
+          </div>
+        </div>
+
+        <div class="header-actions">
+          <button class="notif-button" id="notif-bell" onclick="toggleNotifications(event)">
+            <span class="material-symbols-outlined">notifications</span>
+            <span class="notif-dot" id="notif-dot"></span>
+          </button>
+
+          <!-- Notifications panel -->
+          <div class="notif-panel" id="notif-panel">
+            <div class="notif-header">
+              <h4>Notifications</h4>
+              <button class="notif-clear" onclick="markAllNotificationsRead()">Mark all read</button>
+            </div>
+            <div class="notif-list custom-scrollbar" id="notifications-container">
+              <!-- Populated via Javascript -->
+            </div>
+          </div>
+
+          <div class="header-divider"></div>
+
+          <div class="header-user-profile" style="cursor: pointer;" onclick="triggerLogout()">
+            <img 
+              alt="User avatar" 
+              class="header-avatar" 
+              src="https://lh3.googleusercontent.com/aida-public/AB6AXuDTu7H7bjM1-TANNlJst9JmkZFG0YdSnIhaLCui21I-J9R635iCjK3AFrUyIbn5Rl9UyK2POQajHzXQMsAUqaLnDRnFyqeyBSGYtfi1slflZ6vaOsfHBPpzAPs3U1rF8PeB8p9jjtRvCaDbhYjwFEB76tk3aM0TxiTTgp1rCQ0qYUeoE7hFSQunQhY_CBpCO49IWfPwvSavwT5OzGK3r-sZjsptTdVO7unZLcj1l2DF_38XWXoiF08O"
+            />
+            <div class="header-user-info">
+              <span class="header-username">J. Doe</span>
+              <span class="header-userrole">Dispatcher</span>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <!-- FUEL Workspace -->
+      <div class="fuel-workspace custom-scrollbar">
+        
+        <div class="title-row">
+          <div class="title-info">
+            <h2>Fuel & Expenses</h2>
+            <p>Manage operational costs and vehicle refueling logs.</p>
+          </div>
+          <div class="actions-right">
+            <button class="btn btn-primary" onclick="openModal('log-fuel-modal')">
+              <span class="material-symbols-outlined" style="font-size: 18px; font-weight: bold;">add</span>
+              Log Fuel
+            </button>
+            <button class="btn btn-secondary" onclick="openModal('add-expense-modal')">
+              <span class="material-symbols-outlined" style="font-size: 18px; font-weight: bold;">add</span>
+              Add Expense
+            </button>
+          </div>
+        </div>
+
+        <!-- KPI GRID -->
+        <section class="kpi-grid">
+          <!-- Total Spend -->
+          <div class="kpi-card">
+            <span class="kpi-label">Total Monthly Spend</span>
+            <div class="kpi-value-row">
+              <span class="kpi-value" id="kpi-total-spend">$42,850</span>
+              <span class="kpi-trend red">
+                <span class="material-symbols-outlined" style="font-size: 14px; font-weight: bold; margin-right: 2px;">arrow_upward</span>+5.2%
+              </span>
+            </div>
+          </div>
+
+          <!-- Fuel Costs -->
+          <div class="kpi-card">
+            <span class="kpi-label">Fuel Costs (MTD)</span>
+            <div class="kpi-value-row">
+              <span class="kpi-value" id="kpi-fuel-spend">$28,100</span>
+              <span class="kpi-trend green">
+                <span class="material-symbols-outlined" style="font-size: 14px; font-weight: bold; margin-right: 2px;">arrow_downward</span>-1.1%
+              </span>
+            </div>
+          </div>
+
+          <!-- Avg Cost / Mile -->
+          <div class="kpi-card">
+            <span class="kpi-label">Avg Cost / Mile</span>
+            <div class="kpi-value-row">
+              <span class="kpi-value">$0.45</span>
+              <span class="kpi-comparison-text">vs $0.44 last mo</span>
+            </div>
+          </div>
+        </section>
+
+        <!-- TABS ROW -->
+        <div class="tabs-row">
+          <button class="tab-btn active" id="tab-fuel" onclick="switchTab('fuel')">Fuel Logs</button>
+          <button class="tab-btn" id="tab-expenses" onclick="switchTab('expenses')">Expenses</button>
+        </div>
+
+        <!-- TABLE GRID -->
+        <div class="table-container">
+          <table class="data-table">
+            <thead id="table-thead">
+              <!-- Rendered via JS -->
+            </thead>
+            <tbody id="table-tbody">
+              <!-- Rendered via JS -->
+            </tbody>
+          </table>
+        </div>
+
+      </div>
+
+    </div>
+
+  </div>
+
+  <script>
+    // --- DATABASE ---
+    let fuelLogs = [
+      { id: 1, vehicleId: "TRK-104", date: "Oct 24, 2023 08:30", liters: "120 L", cost: "$185.40", driver: "J. Doe" },
+      { id: 2, vehicleId: "VAN-08", date: "Oct 24, 2023 09:15", liters: "65 L", cost: "$98.20", driver: "S. Smith" },
+      { id: 3, vehicleId: "TRK-201", date: "Oct 23, 2023 14:20", liters: "150 L", cost: "$231.00", driver: "M. Johnson" }
+    ];
+
+    let expenses = [
+      { id: 1, vehicleId: "TRK-9021", date: "Oct 22, 2023", category: "Tire Replacement", cost: "$450.00" },
+      { id: 2, vehicleId: "VAN-404", date: "Oct 20, 2023", category: "Engine Oil Servicing", cost: "$120.00" }
+    ];
+
+    let notifications = [
+      { id: 1, text: "High spending alert on TRK-104 fuel log." }
+    ];
+
+    let activeTab = "fuel"; // or "expenses"
+
+    // --- INITIALIZATION ---
+    window.addEventListener("DOMContentLoaded", () => {
+      renderTable();
+      renderNotificationsList();
+      
+      // Close dropdowns on outside click
+      document.addEventListener("click", (e) => {
+        const notifPanel = document.getElementById("notif-panel");
+        if (notifPanel && !e.target.closest(".notif-button") && !e.target.closest(".notif-panel")) {
+          notifPanel.classList.remove("show");
+        }
+      });
+    });
+
+    // --- TOAST NOTIFICATIONS ---
+    function showToast(message, type = "success") {
+      const container = document.getElementById("toast-container");
+      const el = document.createElement("div");
+      el.className = `toast ${type}`;
+      
+      let icon = "info";
+      if (type === "success") icon = "check_circle";
+      if (type === "error") icon = "error";
+
+      el.innerHTML = `
+        <span class="material-symbols-outlined" style="font-size: 16px;">${icon}</span>
+        <span>${message}</span>
+      `;
+      container.appendChild(el);
+
+      setTimeout(() => {
+        el.style.opacity = "0";
+        el.style.transform = "translateY(-10px)";
+        setTimeout(() => el.remove(), 300);
+      }, 3000);
+    }
+
+    // --- RENDER TABLE ---
+    function renderTable() {
+      const thead = document.getElementById("table-thead");
+      const tbody = document.getElementById("table-tbody");
+      
+      thead.innerHTML = "";
+      tbody.innerHTML = "";
+
+      if (activeTab === "fuel") {
+        // Headers
+        thead.innerHTML = `
+          <tr>
+            <th>Vehicle ID</th>
+            <th>Date</th>
+            <th>Liters</th>
+            <th>Cost</th>
+            <th>Driver</th>
+          </tr>
+        `;
+
+        // Rows
+        fuelLogs.forEach(log => {
+          const tr = document.createElement("tr");
+          tr.innerHTML = `
+            <td><span class="td-bold-black">${log.vehicleId}</span></td>
+            <td>${log.date}</td>
+            <td>${log.liters}</td>
+            <td class="td-bold-black">${log.cost}</td>
+            <td>${log.driver}</td>
+          `;
+          tbody.appendChild(tr);
+        });
+
+      } else {
+        // Expenses headers
+        thead.innerHTML = `
+          <tr>
+            <th>Vehicle ID</th>
+            <th>Date</th>
+            <th>Category / Description</th>
+            <th>Cost</th>
+          </tr>
+        `;
+
+        // Rows
+        expenses.forEach(exp => {
+          const tr = document.createElement("tr");
+          tr.innerHTML = `
+            <td><span class="td-bold-black">${exp.vehicleId}</span></td>
+            <td>${exp.date}</td>
+            <td>${exp.category}</td>
+            <td class="td-bold-black">${exp.cost}</td>
+          `;
+          tbody.appendChild(tr);
+        });
+      }
+    }
+
+    // --- SWITCH TABS ---
+    function switchTab(tabName) {
+      activeTab = tabName;
+      document.getElementById("tab-fuel").className = tabName === "fuel" ? "tab-btn active" : "tab-btn";
+      document.getElementById("tab-expenses").className = tabName === "expenses" ? "tab-btn active" : "tab-btn";
+      
+      renderTable();
+      showToast(`Switched view to ${tabName === 'fuel' ? 'Fuel Logs' : 'Expenses'}`, "info");
+    }
+
+    // --- SEARCH ---
+    function handleSearch(val) {
+      const query = val.trim().toLowerCase();
+      if (!query) return;
+      showToast(`Searching transactions matching "${query}"...`, "info");
+    }
+
+    // --- LOG FUEL LOGIC ---
+    function handleFuelLog(e) {
+      e.preventDefault();
+      
+      const id = document.getElementById("fuel-id").value;
+      const date = document.getElementById("fuel-date").value;
+      const liters = document.getElementById("fuel-liters").value;
+      const cost = document.getElementById("fuel-cost").value;
+      const driver = document.getElementById("fuel-driver").value;
+
+      const newLog = {
+        id: Date.now(),
+        vehicleId: id,
+        date,
+        liters,
+        cost,
+        driver
+      };
+
+      fuelLogs.unshift(newLog); // Prepend
+      
+      // Update MTD Fuel Costs
+      const rawCostVal = parseFloat(cost.replace(/[^0-9.]/g, '')) || 0;
+      updateFuelSpendKPI(rawCostVal);
+
+      switchTab("fuel");
+      closeModal("log-fuel-modal");
+      document.getElementById("log-fuel-form").reset();
+      showToast(`Logged refueling for ${id} ($${rawCostVal.toFixed(2)})!`, "success");
+    }
+
+    // --- ADD GENERAL EXPENSE LOGIC ---
+    function handleExpenseAdd(e) {
+      e.preventDefault();
+      
+      const id = document.getElementById("exp-id").value;
+      const date = document.getElementById("exp-date").value;
+      const category = document.getElementById("exp-cat").value;
+      const cost = document.getElementById("exp-cost").value;
+
+      const newExp = {
+        id: Date.now(),
+        vehicleId: id,
+        date,
+        category,
+        cost
+      };
+
+      expenses.unshift(newExp); // Prepend
+
+      // Update General Spend KPI
+      const rawCostVal = parseFloat(cost.replace(/[^0-9.]/g, '')) || 0;
+      updateTotalSpendKPI(rawCostVal);
+
+      switchTab("expenses");
+      closeModal("add-expense-modal");
+      document.getElementById("add-expense-form").reset();
+      showToast(`Expense added: ${category} for ${id} ($${rawCostVal.toFixed(2)})`, "success");
+    }
+
+    // --- UPDATE KPI NUMBERS ---
+    function updateFuelSpendKPI(addAmount) {
+      const fuelEl = document.getElementById("kpi-fuel-spend");
+      let currentVal = parseFloat(fuelEl.textContent.replace(/[^0-9.]/g, '')) || 0;
+      currentVal += addAmount;
+      fuelEl.textContent = `$${currentVal.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`;
+      
+      // Also update Total spend
+      updateTotalSpendKPI(addAmount);
+    }
+
+    function updateTotalSpendKPI(addAmount) {
+      const totalEl = document.getElementById("kpi-total-spend");
+      let currentVal = parseFloat(totalEl.textContent.replace(/[^0-9.]/g, '')) || 0;
+      currentVal += addAmount;
+      totalEl.textContent = `$${currentVal.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`;
+    }
+
+    // --- MODAL UTILS ---
+    function openModal(id) {
+      document.getElementById(id).classList.add("show");
+    }
+    function closeModal(id) {
+      document.getElementById(id).classList.remove("show");
+    }
+
+    function triggerNavDevelopment(moduleName) {
+      showToast(`"${moduleName}" is under development. Connecting routes...`, "info");
+    }
+
+    function triggerLogout() {
+      showToast("Logging out J. Doe...", "error");
+      setTimeout(() => {
+        window.location.href = "login.html";
+      }, 1000);
+    }
+
+    // --- NOTIFICATION BELL ---
+    function toggleNotifications(e) {
+      e.stopPropagation();
+      document.getElementById("notif-panel").classList.toggle("show");
+    }
+
+    function renderNotificationsList() {
+      const container = document.getElementById("notifications-container");
+      container.innerHTML = "";
+      notifications.forEach(n => {
+        const div = document.createElement("div");
+        div.className = "notif-item";
+        div.innerHTML = `<span class="notif-item-text">${n.text}</span>`;
+        container.appendChild(div);
+      });
+    }
+
+    function markAllNotificationsRead() {
+      notifications = [];
+      document.getElementById("notif-dot").style.display = "none";
+      renderNotificationsList();
+      showToast("Cleared all notifications.", "success");
+    }
+  </script>
+</body>
+</html>

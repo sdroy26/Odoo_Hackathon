@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Vehicle Registry - TransitOps</title>
+  <link rel="stylesheet" href="css/styles.css">
+  <script src="https://unpkg.com/@phosphor-icons/web"></script>
+</head>
+<body>
+  <aside class="sidebar">
+    <div class="logo">
+      <div class="logo-icon"><i class="ph-fill ph-truck"></i></div>
+      <div class="logo-text">
+        <h1>TransitOps</h1>
+        <p style="text-transform:uppercase; font-size:10px; letter-spacing:0.5px; margin-top:2px;">Fleet Management</p>
+      </div>
+    </div>
+    <nav class="nav">
+      <a href="#" class="nav-item"><i class="ph ph-squares-four"></i> Dashboard</a>
+      <a href="registry.html" class="nav-item active"><i class="ph ph-truck"></i> Vehicles</a>
+      <a href="#" class="nav-item"><i class="ph ph-user"></i> Drivers</a>
+      <a href="trips.html" class="nav-item"><i class="ph ph-git-merge"></i> Trips</a>
+      <a href="#" class="nav-item"><i class="ph ph-wrench"></i> Maintenance</a>
+      <a href="#" class="nav-item"><i class="ph ph-gas-pump"></i> Fuel/Expenses</a>
+      <a href="reports.html" class="nav-item"><i class="ph ph-chart-bar"></i> Reports</a>
+    </nav>
+    <div class="sidebar-footer" style="padding:0; border:none; display:block;">
+       <a href="settings.html" class="nav-item"><i class="ph ph-gear"></i> Settings</a>
+    </div>
+    <div class="sidebar-footer" style="margin-top:auto;">
+      <div class="user-avatar-text" style="background:#1e293b;">TO</div>
+      <div class="user-info">
+        <h4>Admin User</h4>
+        <p>Fleet Manager</p>
+      </div>
+    </div>
+  </aside>
+
+  <main class="main" style="position:relative;">
+    <header class="header">
+      <div class="search">
+        <i class="ph ph-magnifying-glass"></i>
+        <input type="text" placeholder="Search vehicles, VINs, or license plates...">
+      </div>
+      <div class="header-actions">
+        <div class="notification">
+          <i class="ph ph-bell"></i>
+          <span class="notification-dot"></span>
+        </div>
+      </div>
+    </header>
+
+    <div class="content" style="padding-right: 420px;">
+      <div class="page-header" style="margin-bottom: 24px;">
+        <div class="page-title">
+          <h2 style="font-size:28px;">Vehicle Registry</h2>
+          <p>Manage and track your entire fleet inventory.</p>
+        </div>
+      </div>
+
+      <div class="card" style="padding:0; min-height:600px; display:flex; flex-direction:column;">
+        
+        <div style="padding: 24px; display:flex; gap:16px; border-bottom:1px solid var(--border-color);">
+           <div class="input-field" style="width:auto; min-width:140px; justify-content:space-between; cursor:pointer;">All Types <i class="ph ph-caret-down"></i></div>
+           <div class="input-field" style="width:auto; min-width:140px; justify-content:space-between; cursor:pointer;">All Statuses <i class="ph ph-caret-down"></i></div>
+           <div class="input-field" style="width:auto; min-width:140px; justify-content:space-between; cursor:pointer;">All Regions <i class="ph ph-caret-down"></i></div>
+        </div>
+
+        <table style="flex:1;">
+          <thead>
+            <tr>
+              <th style="padding-left:24px;">Reg. Number</th>
+              <th>Name / Model</th>
+              <th>Type</th>
+              <th>Max Load</th>
+              <th>Odometer</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr style="background:#f8fafc; box-shadow: inset 3px 0 0 var(--primary-color);">
+              <td style="padding-left:24px; font-weight:600; color:var(--text-dark);">TRK-9021</td>
+              <td>
+                <div style="font-weight:600; color:var(--text-dark);">Alpha Hauler</div>
+                <div style="font-size:12px; color:var(--text-gray);">Volvo FH16</div>
+              </td>
+              <td style="color:var(--text-gray);">Heavy Duty</td>
+              <td style="color:var(--text-gray);">44,000 lbs</td>
+              <td style="color:var(--text-gray);">124,500 mi</td>
+            </tr>
+            <tr>
+              <td style="padding-left:24px; font-weight:600; color:var(--text-dark);">VAN-405</td>
+              <td>
+                <div style="font-weight:600; color:var(--text-dark);">City Sprinter</div>
+                <div style="font-size:12px; color:var(--text-gray);">MB Sprinter 2500</div>
+              </td>
+              <td style="color:var(--text-gray);">Cargo Van</td>
+              <td style="color:var(--text-gray);">3,800 lbs</td>
+              <td style="color:var(--text-gray);">45,210 mi</td>
+            </tr>
+            <tr>
+              <td style="padding-left:24px; font-weight:600; color:var(--text-dark);">TRK-8832</td>
+              <td>
+                <div style="font-weight:600; color:var(--text-dark);">Beta Hauler</div>
+                <div style="font-size:12px; color:var(--text-gray);">Peterbilt 579</div>
+              </td>
+              <td style="color:var(--text-gray);">Heavy Duty</td>
+              <td style="color:var(--text-gray);">40,000 lbs</td>
+              <td style="color:var(--text-gray);">312,099 mi</td>
+            </tr>
+            <tr>
+              <td style="padding-left:24px; font-weight:600; color:var(--text-dark);">SED-102</td>
+              <td>
+                <div style="font-weight:600; color:var(--text-dark);">Exec Transport</div>
+                <div style="font-size:12px; color:var(--text-gray);">Toyota Camry Hybrid</div>
+              </td>
+              <td style="color:var(--text-gray);">Sedan</td>
+              <td style="color:var(--text-gray);">1,000 lbs</td>
+              <td style="color:var(--text-gray);">89,400 mi</td>
+            </tr>
+          </tbody>
+        </table>
+        
+        <div style="padding: 16px 24px; border-top:1px solid var(--border-color); font-size:13px; color:var(--text-gray);">
+           Showing 1 to 4 of 128 vehicles
+        </div>
+      </div>
+    </div>
+
+    <!-- Right Slide-out Panel -->
+    <div style="position:absolute; top:64px; right:0; bottom:0; width:400px; background:white; border-left:1px solid var(--border-color); box-shadow:-4px 0 24px rgba(0,0,0,0.05); overflow-y:auto; z-index:100;">
+       <div style="padding:24px;">
+          <!-- Handle bar top -->
+          <div style="width:40px; height:4px; background:#1e293b; border-radius:2px; margin:0 auto 24px auto;"></div>
+          
+          <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:24px;">
+            <div>
+              <div style="display:flex; gap:8px; margin-bottom:12px;">
+                 <span class="badge badge-blue">TRK-9021</span>
+                 <span class="badge badge-blue" style="background:#eff6ff;"><span class="status-dot active"></span> On Trip</span>
+              </div>
+              <h3 style="font-size:24px; font-weight:700; margin-bottom:4px;">Alpha Hauler</h3>
+              <p style="font-size:13px; color:var(--text-gray);">Volvo FH16 &bull; Heavy Duty Truck</p>
+            </div>
+            <button class="btn-icon" style="border:none;"><i class="ph ph-x" style="font-size:20px; color:var(--text-dark);"></i></button>
+          </div>
+
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-bottom:16px;">
+            <div style="border:1px solid var(--border-color); border-radius:8px; padding:16px;">
+              <div style="font-size:11px; color:var(--text-gray); margin-bottom:8px;">Odometer</div>
+              <div style="font-size:18px; font-weight:700; font-family:monospace;">124,500 mi</div>
+            </div>
+            <div style="border:1px solid var(--border-color); border-radius:8px; padding:16px;">
+              <div style="font-size:11px; color:var(--text-gray); margin-bottom:8px;">Acquisition Cost</div>
+              <div style="font-size:18px; font-weight:700; font-family:monospace;">$185,000</div>
+            </div>
+          </div>
+
+          <div style="border:1px solid var(--primary-color); border-radius:8px; padding:16px; display:flex; justify-content:space-between; align-items:center; margin-bottom:32px; background:#f8fafc;">
+             <div>
+                <div style="font-size:11px; color:var(--text-gray); margin-bottom:4px;">Current Assignment</div>
+                <div style="font-size:13px; font-weight:600; color:var(--text-dark);">Route #884 (Chicago &rarr; Detroit)</div>
+             </div>
+             <i class="ph ph-git-merge" style="color:var(--primary-color); font-size:24px;"></i>
+          </div>
+
+          <h4 style="font-size:11px; font-weight:700; color:var(--text-dark); text-transform:uppercase; letter-spacing:0.5px; margin-bottom:24px;">LIFECYCLE TIMELINE</h4>
+          
+          <div style="position:relative; padding-left:20px; margin-bottom:40px;">
+            <div style="position:absolute; left:4px; top:4px; bottom:16px; width:1px; background:var(--border-color);"></div>
+            
+            <div style="position:relative; margin-bottom:24px;">
+              <div style="position:absolute; left:-20px; top:4px; width:9px; height:9px; background:var(--primary-color); border-radius:50%;"></div>
+              <div style="display:flex; justify-content:space-between; align-items:baseline; margin-bottom:4px;">
+                <div style="font-weight:600; font-size:13px; color:var(--text-dark);">On Trip</div>
+                <div style="font-size:11px; color:var(--text-gray);">Today, 08:30 AM</div>
+              </div>
+              <div style="font-size:12px; color:var(--text-gray); line-height:1.5;">Departed origin facility. ETA to destination: 4h 15m.</div>
+            </div>
+            
+            <div style="position:relative; margin-bottom:24px;">
+              <div style="position:absolute; left:-19px; top:4px; width:7px; height:7px; background:var(--text-gray); border-radius:50%;"></div>
+              <div style="display:flex; justify-content:space-between; align-items:baseline; margin-bottom:4px;">
+                <div style="font-weight:600; font-size:13px; color:var(--text-dark);">Assigned to Driver</div>
+                <div style="font-size:11px; color:var(--text-gray);">Yesterday, 14:00</div>
+              </div>
+              <div style="font-size:12px; color:var(--text-gray); line-height:1.5;">Assigned to M. Johnson for upcoming freight run.</div>
+            </div>
+
+            <div style="position:relative; margin-bottom:24px;">
+              <div style="position:absolute; left:-19px; top:4px; width:7px; height:7px; background:var(--text-gray); border-radius:50%;"></div>
+              <div style="display:flex; justify-content:space-between; align-items:baseline; margin-bottom:4px;">
+                <div style="font-weight:600; font-size:13px; color:var(--text-dark);">Available</div>
+                <div style="font-size:11px; color:var(--text-gray);">Oct 24, 10:15 AM</div>
+              </div>
+              <div style="font-size:12px; color:var(--text-gray); line-height:1.5;">Cleared from maintenance yard.</div>
+            </div>
+
+            <div style="position:relative;">
+              <div style="position:absolute; left:-19px; top:4px; width:7px; height:7px; background:#f97316; border-radius:50%;"></div>
+              <div style="display:flex; justify-content:space-between; align-items:baseline; margin-bottom:8px;">
+                <div style="font-weight:600; font-size:13px; color:var(--text-dark);">Scheduled Maintenance</div>
+                <div style="font-size:11px; color:var(--text-gray);">Oct 22, 09:00 AM</div>
+              </div>
+              <div style="border:1px solid var(--border-color); border-radius:6px; padding:12px; display:flex; justify-content:space-between; font-size:12px;">
+                 <span style="color:var(--text-gray);">Work Order #WO-4992</span>
+                 <a href="#" style="color:var(--primary-color); text-decoration:none; font-weight:500;">View Ticket</a>
+              </div>
+            </div>
+          </div>
+
+          <h4 style="font-size:11px; font-weight:700; color:var(--text-dark); text-transform:uppercase; letter-spacing:0.5px; margin-bottom:16px;">RECORDS & DOCUMENTS</h4>
+          
+          <div style="border:1px solid var(--border-color); border-radius:8px; margin-bottom:16px;">
+             <div style="padding:16px; display:flex; align-items:center; gap:16px; border-bottom:1px solid var(--border-color); cursor:pointer;">
+                <div style="background:#f1f5f9; padding:8px; border-radius:6px; color:var(--text-gray);">
+                   <i class="ph ph-gas-pump" style="font-size:20px;"></i>
+                </div>
+                <div style="flex:1;">
+                   <div style="font-size:13px; font-weight:600; color:var(--text-dark);">Recent Fuel Logs</div>
+                   <div style="font-size:12px; color:var(--text-gray);">Last entry: 2 days ago (110 gal)</div>
+                </div>
+                <i class="ph ph-caret-right" style="color:var(--text-gray);"></i>
+             </div>
+             <div style="padding:16px;">
+                <div style="display:flex; align-items:center; gap:16px; margin-bottom:16px;">
+                   <div style="background:#f1f5f9; padding:8px; border-radius:6px; color:var(--text-gray);">
+                      <i class="ph ph-file-text" style="font-size:20px;"></i>
+                   </div>
+                   <div style="font-size:13px; font-weight:600; color:var(--text-dark);">Document Status</div>
+                </div>
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px; padding-left:48px;">
+                   <span style="font-size:13px; color:var(--text-dark);">Registration</span>
+                   <span style="font-size:12px; color:var(--success-color); display:flex; align-items:center; gap:4px; font-weight:500;"><i class="ph ph-check-circle"></i> Valid (11 mos)</span>
+                </div>
+                <div style="display:flex; justify-content:space-between; align-items:center; padding-left:48px;">
+                   <span style="font-size:13px; color:var(--text-dark);">Insurance Policy</span>
+                   <span style="font-size:12px; color:#b45309; background:#fef3c7; padding:4px 8px; border-radius:4px; display:flex; align-items:center; gap:4px; font-weight:500;"><i class="ph ph-warning"></i> Expires in 14 days</span>
+                </div>
+             </div>
+          </div>
+
+       </div>
+    </div>
+  </main>
+</body>
+</html>

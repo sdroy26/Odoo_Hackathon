@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Reports & Analytics - TransitOps</title>
+  <link rel="stylesheet" href="css/styles.css">
+  <script src="https://unpkg.com/@phosphor-icons/web"></script>
+</head>
+<body>
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div class="logo">
+      <div class="logo-icon"><i class="ph-fill ph-truck"></i></div>
+      <div class="logo-text">
+        <h1>TransitOps</h1>
+        <p>Fleet Management</p>
+      </div>
+    </div>
+    <nav class="nav">
+      <a href="#" class="nav-item"><i class="ph ph-squares-four"></i> Dashboard</a>
+      <a href="registry.html" class="nav-item"><i class="ph ph-truck"></i> Vehicles</a>
+      <a href="#" class="nav-item"><i class="ph ph-user"></i> Drivers</a>
+      <a href="trips.html" class="nav-item"><i class="ph ph-git-merge"></i> Trips</a>
+      <a href="#" class="nav-item"><i class="ph ph-wrench"></i> Maintenance</a>
+      <a href="#" class="nav-item"><i class="ph ph-gas-pump"></i> Fuel/Expenses</a>
+      <a href="reports.html" class="nav-item active"><i class="ph ph-chart-bar"></i> Reports</a>
+      <a href="#" class="nav-item"><i class="ph ph-calendar-blank"></i> Calendar</a>
+      <a href="#" class="nav-item"><i class="ph ph-file-text"></i> Documents</a>
+    </nav>
+    <div class="sidebar-footer" style="border-top: none; padding-bottom: 24px;">
+      <a href="settings.html" class="nav-item" style="padding: 0; margin-bottom: 20px; width: 100%;"><i class="ph ph-gear"></i> Settings</a>
+    </div>
+  </aside>
+
+  <!-- Main Content -->
+  <main class="main">
+    <header class="header">
+      <div class="search">
+        <i class="ph ph-magnifying-glass"></i>
+        <input type="text" placeholder="Search reports...">
+      </div>
+      <div class="header-actions">
+        <div class="notification">
+          <i class="ph ph-bell"></i>
+          <span class="notification-dot"></span>
+        </div>
+        <button class="profile-btn">
+          <img src="https://ui-avatars.com/api/?name=Admin+User&background=0D8ABC&color=fff" alt="Profile">
+        </button>
+      </div>
+    </header>
+
+    <div class="content">
+      <div class="page-header">
+        <div class="page-title">
+          <h2>Reports & Analytics</h2>
+          <p>Comprehensive overview of fleet performance and operational costs.</p>
+        </div>
+        <div class="page-actions">
+          <button class="btn btn-secondary"><i class="ph ph-upload-simple"></i> Bulk CSV Import</button>
+          <button class="btn btn-secondary"><i class="ph ph-download-simple"></i> Export CSV</button>
+        </div>
+      </div>
+
+      <div class="grid-4">
+        <div class="card">
+          <div class="card-title">Fleet Utilization <i class="ph ph-speedometer card-icon" style="color: #cbd5e1;"></i></div>
+          <div class="card-value">82.4%</div>
+          <div class="trend trend-up"><i class="ph ph-trend-up"></i> +3.2% vs last month</div>
+        </div>
+        <div class="card">
+          <div class="card-title">Avg Fuel Efficiency <i class="ph ph-gas-pump card-icon" style="color: #cbd5e1;"></i></div>
+          <div class="card-value">6.8 <span style="font-size:14px; color:var(--text-gray); font-weight:500;">km/L</span></div>
+          <div class="trend trend-down"><i class="ph ph-trend-down"></i> -0.5% vs last month</div>
+        </div>
+        <div class="card">
+          <div class="card-title">Operational Cost/Mo <i class="ph ph-money card-icon" style="color: #cbd5e1;"></i></div>
+          <div class="card-value">$124.5k</div>
+          <div class="trend trend-up" style="color:var(--danger-color); background:var(--danger-bg);"><i class="ph ph-trend-up"></i> +1.8% vs last month</div>
+        </div>
+        <div class="card">
+          <div class="card-title">Vehicle ROI <i class="ph ph-trend-up card-icon" style="color: #cbd5e1;"></i></div>
+          <div class="card-value">18.2%</div>
+          <div class="trend trend-up"><i class="ph ph-trend-up"></i> +2.1% YoY</div>
+        </div>
+      </div>
+
+      <div class="grid-3-1">
+        <div class="left-col" style="display:flex; flex-direction:column; gap:20px;">
+          <!-- Main Chart -->
+          <div class="card">
+            <div class="card-title" style="font-size: 16px; text-transform:none; color:var(--text-dark); margin-bottom: 24px;">
+              Fleet Utilization Over Time
+              <i class="ph ph-dots-three-vertical" style="font-size: 24px; cursor: pointer;"></i>
+            </div>
+            <div style="height: 280px; position:relative;">
+                <!-- Dummy Axis -->
+                <div style="position:absolute; left:0; top:0; bottom:0; display:flex; flex-direction:column; justify-content:space-between; font-size:11px; color:var(--text-gray); padding-bottom: 24px;">
+                  <span>100%</span><span>90%</span><span>80%</span><span>70%</span><span>60%</span><span>50%</span><span>40%</span><span>30%</span><span>20%</span><span>10%</span><span>0%</span>
+                </div>
+                <!-- Chart Area -->
+                <div style="margin-left: 36px; height: 100%; position:relative; border-bottom: 1px solid var(--border-color); background: linear-gradient(180deg, rgba(11,87,208,0.05) 0%, rgba(11,87,208,0) 100%);">
+                  <svg width="100%" height="calc(100% - 24px)" viewBox="0 0 700 256" preserveAspectRatio="none">
+                    <!-- Grid Lines -->
+                    <line x1="0" y1="25" x2="700" y2="25" stroke="#f1f5f9" stroke-width="1"/>
+                    <line x1="0" y1="51" x2="700" y2="51" stroke="#f1f5f9" stroke-width="1"/>
+                    <line x1="0" y1="76" x2="700" y2="76" stroke="#f1f5f9" stroke-width="1"/>
+                    <line x1="0" y1="102" x2="700" y2="102" stroke="#f1f5f9" stroke-width="1"/>
+                    <line x1="0" y1="128" x2="700" y2="128" stroke="#f1f5f9" stroke-width="1"/>
+                    <line x1="0" y1="153" x2="700" y2="153" stroke="#f1f5f9" stroke-width="1"/>
+                    <line x1="0" y1="179" x2="700" y2="179" stroke="#f1f5f9" stroke-width="1"/>
+                    <line x1="0" y1="204" x2="700" y2="204" stroke="#f1f5f9" stroke-width="1"/>
+                    <line x1="0" y1="230" x2="700" y2="230" stroke="#f1f5f9" stroke-width="1"/>
+
+                    <!-- Data Line -->
+                    <path d="M0 60 Q 50 40 100 45 T 200 60 T 300 50 T 400 35 T 500 40 T 600 130 T 700 160" fill="none" stroke="#3b82f6" stroke-width="2.5"/>
+                    
+                    <!-- Data Points -->
+                    <circle cx="0" cy="60" r="4" fill="white" stroke="#3b82f6" stroke-width="2"/>
+                    <circle cx="100" cy="45" r="4" fill="white" stroke="#3b82f6" stroke-width="2"/>
+                    <circle cx="200" cy="60" r="4" fill="white" stroke="#3b82f6" stroke-width="2"/>
+                    <circle cx="300" cy="50" r="4" fill="white" stroke="#3b82f6" stroke-width="2"/>
+                    <circle cx="400" cy="35" r="4" fill="white" stroke="#3b82f6" stroke-width="2"/>
+                    <circle cx="500" cy="40" r="4" fill="white" stroke="#3b82f6" stroke-width="2"/>
+                    <circle cx="600" cy="130" r="4" fill="white" stroke="#3b82f6" stroke-width="2"/>
+                    <circle cx="700" cy="160" r="4" fill="white" stroke="#3b82f6" stroke-width="2"/>
+                  </svg>
+                  
+                  <div style="position:absolute; bottom:-24px; left:0; right:0; display:flex; justify-content:space-between; font-size:11px; color:var(--text-gray); padding-top:8px;">
+                    <span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span><span>Sat</span><span>Sun</span>
+                  </div>
+                </div>
+            </div>
+          </div>
+
+          <div class="grid-2" style="margin-bottom:0;">
+            <!-- Donut -->
+            <div class="card">
+              <div class="card-title" style="font-size: 15px; text-transform:none; color:var(--text-dark);">Monthly Expense Breakdown</div>
+              <div style="height: 220px; display:flex; align-items:center; justify-content:center; position:relative;">
+                  <svg width="180" height="180" viewBox="0 0 36 36">
+                    <circle r="14" cx="18" cy="18" fill="transparent" stroke="#0b57d0" stroke-width="8" stroke-dasharray="45 100" stroke-dashoffset="0"></circle>
+                    <circle r="14" cx="18" cy="18" fill="transparent" stroke="#3b82f6" stroke-width="8" stroke-dasharray="25 100" stroke-dashoffset="-45"></circle>
+                    <circle r="14" cx="18" cy="18" fill="transparent" stroke="#93c5fd" stroke-width="8" stroke-dasharray="20 100" stroke-dashoffset="-70"></circle>
+                    <circle r="14" cx="18" cy="18" fill="transparent" stroke="#dbeafe" stroke-width="8" stroke-dasharray="10 100" stroke-dashoffset="-90"></circle>
+                  </svg>
+                  <div style="position:absolute; width:100%; height:100%; border-radius:50%; top:0;left:0;"></div>
+              </div>
+              <div style="display:flex; flex-wrap:wrap; gap:16px; font-size:11px; margin-top:8px;">
+                <div style="display:flex; align-items:center; gap:6px; width:45%;"><div style="width:10px; height:10px; background:#0b57d0; border-radius:50%;"></div> Fuel (45%)</div>
+                <div style="display:flex; align-items:center; gap:6px; width:45%;"><div style="width:10px; height:10px; background:#3b82f6; border-radius:50%;"></div> Maintenance (25%)</div>
+                <div style="display:flex; align-items:center; gap:6px; width:45%;"><div style="width:10px; height:10px; background:#93c5fd; border-radius:50%;"></div> Payroll (20%)</div>
+                <div style="display:flex; align-items:center; gap:6px; width:45%;"><div style="width:10px; height:10px; background:#dbeafe; border-radius:50%;"></div> Other (10%)</div>
+              </div>
+            </div>
+            <!-- Line Chart Small -->
+            <div class="card">
+              <div class="card-title" style="font-size: 15px; text-transform:none; color:var(--text-dark);">Cost-per-km Trend</div>
+              <div style="height: 240px; position:relative; display:flex;">
+                 <!-- Dummy Axis -->
+                 <div style="display:flex; flex-direction:column; justify-content:space-between; font-size:11px; color:var(--text-gray); padding-bottom: 24px; padding-right:12px; height: 100%;">
+                    <span>$1.28</span><span>$1.27</span><span>$1.26</span><span>$1.25</span><span>$1.24</span><span>$1.23</span><span>$1.22</span>
+                 </div>
+                 <div style="flex:1; border-bottom: 1px solid var(--border-color); position:relative;">
+                   <svg width="100%" height="calc(100% - 24px)" viewBox="0 0 200 150" preserveAspectRatio="none">
+                      <line x1="0" y1="25" x2="200" y2="25" stroke="#f1f5f9" stroke-width="1"/>
+                      <line x1="0" y1="50" x2="200" y2="50" stroke="#f1f5f9" stroke-width="1"/>
+                      <line x1="0" y1="75" x2="200" y2="75" stroke="#f1f5f9" stroke-width="1"/>
+                      <line x1="0" y1="100" x2="200" y2="100" stroke="#f1f5f9" stroke-width="1"/>
+                      <line x1="0" y1="125" x2="200" y2="125" stroke="#f1f5f9" stroke-width="1"/>
+
+                      <path d="M10 80 L70 20 L130 140 L190 60" fill="none" stroke="#0b57d0" stroke-width="2"/>
+                      <circle cx="10" cy="80" r="3" fill="white" stroke="#0b57d0" stroke-width="2"/>
+                      <circle cx="70" cy="20" r="3" fill="white" stroke="#0b57d0" stroke-width="2"/>
+                      <circle cx="130" cy="140" r="3" fill="white" stroke="#0b57d0" stroke-width="2"/>
+                      <circle cx="190" cy="60" r="3" fill="white" stroke="#0b57d0" stroke-width="2"/>
+                   </svg>
+                   <div style="position:absolute; bottom:-24px; left:0; right:0; display:flex; justify-content:space-between; font-size:11px; color:var(--text-gray); padding-top:8px;">
+                      <span>W1</span><span>W2</span><span>W3</span><span>W4</span>
+                   </div>
+                 </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="right-col">
+          <div class="card" style="height: 100%;">
+            <div style="display:flex; align-items:flex-start; gap:16px; margin-bottom:16px;">
+               <div style="padding:10px; background:#eff6ff; border-radius:8px; color:var(--primary-color);">
+                 <i class="ph ph-file-text" style="font-size:24px;"></i>
+               </div>
+               <div>
+                 <h3 style="font-size:16px; font-weight:600; margin-bottom:6px;">Generate Custom Report</h3>
+                 <p style="font-size:13px; color:var(--text-gray); line-height:1.5;">Select parameters to build a detailed analysis report for stakeholders.</p>
+               </div>
+            </div>
+            <hr style="border:none; border-top:1px solid var(--border-color); margin:24px 0;">
+            <div class="input-group">
+               <label class="input-label">Date Range</label>
+               <div class="input-field"><i class="ph ph-calendar-blank" style="color:var(--text-gray);"></i> Oct 01, 2023 - Oct 31, 2023</div>
+            </div>
+            <div class="input-group">
+               <label class="input-label">Report Type</label>
+               <div class="input-field">Comprehensive Fleet Performan...</div>
+            </div>
+            <div class="input-group">
+               <label class="input-label">Vehicle Group</label>
+               <div class="input-field" style="justify-content:space-between;">All Vehicles <i class="ph ph-caret-down"></i></div>
+            </div>
+            <div class="input-group" style="margin-top:24px;">
+               <label class="input-label" style="margin-bottom:16px;">Include Metrics</label>
+               <label style="display:flex; align-items:center; gap:12px; font-size:13px; margin-bottom:14px; cursor:pointer;">
+                 <input type="checkbox" checked style="width:16px; height:16px; accent-color:var(--primary-color);"> Distance Traveled
+               </label>
+               <label style="display:flex; align-items:center; gap:12px; font-size:13px; margin-bottom:14px; cursor:pointer;">
+                 <input type="checkbox" checked style="width:16px; height:16px; accent-color:var(--primary-color);"> Fuel Consumption Rate
+               </label>
+               <label style="display:flex; align-items:center; gap:12px; font-size:13px; margin-bottom:14px; cursor:pointer;">
+                 <input type="checkbox" style="width:16px; height:16px; accent-color:var(--primary-color);"> Maintenance Incidents
+               </label>
+            </div>
+            <button class="btn btn-primary" style="width:100%; justify-content:center; margin-top:32px; padding:12px; font-size:14px;">
+               <i class="ph ph-play"></i> Generate Report
+            </button>
+            <p style="text-align:center; font-size:11px; color:var(--text-gray); margin-top:16px;">Report will be generated as a PDF.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+</body>
+</html>

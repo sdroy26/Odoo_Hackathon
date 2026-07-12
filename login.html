@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login - TransitOps Fleet Management</title>
+  <!-- Google Fonts & Material Symbols -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet" />
+  
+  <style>
+    /* RESET & BASE */
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    body {
+      font-family: 'Inter', sans-serif;
+      background-color: #f8fafc;
+      color: #0f172a;
+      height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+    }
+
+    /* TOAST ALERTS */
+    #toast-container {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      z-index: 9999;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .toast {
+      background: #1e293b;
+      color: #ffffff;
+      padding: 12px 20px;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 500;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      transform: translateY(-20px);
+      opacity: 0;
+      animation: toastIn 0.3s forwards;
+      transition: opacity 0.3s, transform 0.3s;
+    }
+    @keyframes toastIn {
+      to {
+        transform: translateY(0);
+        opacity: 1;
+      }
+    }
+    .toast.success { background-color: #059669; }
+    .toast.error { background-color: #ef4444; }
+
+    /* CARD LAYOUT */
+    .login-card {
+      background: #ffffff;
+      border: 1px solid #e2e8f0;
+      border-radius: 12px;
+      width: 100%;
+      max-width: 440px;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.04);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+    
+    .card-top {
+      padding: 40px 40px 24px 40px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      border-bottom: 1px solid #f1f5f9;
+    }
+    .logo-block {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 14px;
+    }
+    .logo-icon {
+      color: #2563eb;
+      font-size: 28px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .logo-text {
+      font-size: 22px;
+      font-weight: 700;
+      color: #0f172a;
+    }
+    .subtitle {
+      font-size: 13px;
+      color: #64748b;
+      text-align: center;
+    }
+
+    /* FORM CONTENT */
+    .card-body {
+      padding: 32px 40px;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .label-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .form-label {
+      font-size: 11px;
+      font-weight: 600;
+      color: #64748b;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    .forgot-link {
+      font-size: 11px;
+      color: #2563eb;
+      text-decoration: none;
+      font-weight: 600;
+    }
+    .forgot-link:hover {
+      text-decoration: underline;
+    }
+    .input-wrapper {
+      position: relative;
+      display: flex;
+      align-items: center;
+    }
+    .input-icon {
+      position: absolute;
+      left: 14px;
+      color: #94a3b8;
+      font-size: 20px;
+      pointer-events: none;
+    }
+    .input-field {
+      width: 100%;
+      height: 42px;
+      background: #ffffff;
+      border: 1px solid #e2e8f0;
+      border-radius: 6px;
+      padding: 0 16px 0 42px;
+      font-size: 13px;
+      color: #0f172a;
+      outline: none;
+      transition: border-color 0.15s, box-shadow 0.15s;
+    }
+    .input-field::placeholder {
+      color: #cbd5e1;
+    }
+    .input-field:focus {
+      border-color: #2563eb;
+      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+    }
+    
+    /* PASSWORD EYE */
+    .password-eye {
+      position: absolute;
+      right: 14px;
+      color: #94a3b8;
+      font-size: 20px;
+      cursor: pointer;
+      user-select: none;
+      transition: color 0.15s;
+    }
+    .password-eye:hover {
+      color: #475569;
+    }
+
+    .btn-submit {
+      width: 100%;
+      height: 44px;
+      background: #2563eb;
+      color: #ffffff;
+      border: none;
+      border-radius: 6px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.15s;
+      margin-top: 10px;
+    }
+    .btn-submit:hover {
+      background: #1d4ed8;
+    }
+
+    /* CARD FOOTER */
+    .card-footer {
+      background: #eff6ff;
+      padding: 16px;
+      text-align: center;
+      font-size: 12px;
+      border-top: 1px solid #dbeafe;
+    }
+    .footer-link {
+      color: #2563eb;
+      text-decoration: none;
+      font-weight: 600;
+    }
+    .footer-link:hover {
+      text-decoration: underline;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- TOAST NOTIFICATION CONTAINER -->
+  <div id="toast-container"></div>
+
+  <!-- LOGIN CARD -->
+  <div class="login-card">
+    <div class="card-top">
+      <div class="logo-block">
+        <div class="logo-icon">
+          <span class="material-symbols-outlined">local_shipping</span>
+        </div>
+        <span class="logo-text">TransitOps</span>
+      </div>
+      <div class="subtitle">Sign in to your fleet management dashboard.</div>
+    </div>
+    
+    <form onsubmit="handleLogin(event)">
+      <div class="card-body">
+        <!-- Email Input -->
+        <div class="form-group">
+          <label class="form-label" for="email">Email Address</label>
+          <div class="input-wrapper">
+            <span class="material-symbols-outlined input-icon">mail</span>
+            <input 
+              type="email" 
+              class="input-field" 
+              id="email" 
+              placeholder="operator@transitops.com" 
+              required
+            >
+          </div>
+        </div>
+
+        <!-- Password Input -->
+        <div class="form-group">
+          <div class="label-row">
+            <label class="form-label" for="password">Password</label>
+            <a href="#" class="forgot-link" onclick="triggerForgotPass(event)">Forgot Password?</a>
+          </div>
+          <div class="input-wrapper">
+            <span class="material-symbols-outlined input-icon">lock</span>
+            <input 
+              type="password" 
+              class="input-field" 
+              id="password" 
+              placeholder="••••••••" 
+              required
+            >
+            <span class="material-symbols-outlined password-eye" id="password-toggle" onclick="togglePasswordVisibility()">visibility_off</span>
+          </div>
+        </div>
+
+        <!-- Submit Button -->
+        <button type="submit" class="btn-submit">Sign in</button>
+      </div>
+    </form>
+
+    <div class="card-footer">
+      <span>Need access? </span><a href="#" class="footer-link" onclick="triggerContactAdmin(event)">Contact your administrator</a>
+    </div>
+  </div>
+
+  <script>
+    // --- TOAST ALERTS SYSTEM ---
+    function showToast(message, type = "success") {
+      const container = document.getElementById("toast-container");
+      const el = document.createElement("div");
+      el.className = `toast ${type}`;
+      
+      let icon = "info";
+      if (type === "success") icon = "check_circle";
+      if (type === "error") icon = "error";
+
+      el.innerHTML = `
+        <span class="material-symbols-outlined" style="font-size: 16px;">${icon}</span>
+        <span>${message}</span>
+      `;
+      container.appendChild(el);
+
+      setTimeout(() => {
+        el.style.opacity = "0";
+        el.style.transform = "translateY(-10px)";
+        setTimeout(() => el.remove(), 300);
+      }, 3000);
+    }
+
+    // --- TOGGLE PASSWORD EYE ---
+    function togglePasswordVisibility() {
+      const field = document.getElementById("password");
+      const toggle = document.getElementById("password-toggle");
+      
+      if (field.type === "password") {
+        field.type = "text";
+        toggle.textContent = "visibility";
+      } else {
+        field.type = "password";
+        toggle.textContent = "visibility_off";
+      }
+    }
+
+    // --- SIGN IN HANDLE ---
+    function handleLogin(e) {
+      e.preventDefault();
+      
+      const email = document.getElementById("email").value;
+      
+      showToast("Verification successful! Logging in...", "success");
+      
+      setTimeout(() => {
+        window.location.href = "dashboard.html";
+      }, 1000);
+    }
+
+    // --- FORGOT PASS ---
+    function triggerForgotPass(e) {
+      e.preventDefault();
+      showToast("Password reset link sent to your email address.", "success");
+    }
+
+    // --- CONTACT ADMIN ---
+    function triggerContactAdmin(e) {
+      e.preventDefault();
+      showToast("Please reach out to support@transitops.com for system credentials.", "info");
+    }
+  </script>
+</body>
+</html>
