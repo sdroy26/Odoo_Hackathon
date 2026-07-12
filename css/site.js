@@ -105,6 +105,59 @@
     setTimeout(function () { document.addEventListener('click', function close(e) { if (!menu.contains(e.target) && e.target !== field) { menu.remove(); document.removeEventListener('click', close); } }); }, 0);
   }
 
+  const recordConfig = {
+    vehicle: {
+      title: 'Add Vehicle', table: 'vehicle-records', storage: 'transitops-vehicles',
+      fields: [['registration', 'Registration number', 'text'], ['name', 'Vehicle name', 'text'], ['model', 'Model', 'text'], ['type', 'Type', 'text'], ['odometer', 'Odometer', 'number']],
+      row: function (v) { return '<tr><td style="padding-left:24px;font-weight:600;color:var(--text-dark);">' + escapeHtml(v.registration) + '</td><td><div style="font-weight:600;color:var(--text-dark);">' + escapeHtml(v.name) + '</div><div style="font-size:12px;color:var(--text-gray);">' + escapeHtml(v.model) + '</div></td><td style="color:var(--text-gray);">' + escapeHtml(v.type) + '</td><td style="color:var(--text-gray);">—</td><td style="color:var(--text-gray);">' + Number(v.odometer).toLocaleString() + ' mi</td></tr>'; }
+    },
+    driver: {
+      title: 'Add Driver', table: 'driver-records', storage: 'transitops-drivers',
+      fields: [['name', 'Full name', 'text'], ['email', 'Email address', 'email'], ['licence', 'Licence', 'text'], ['vehicle', 'Assigned vehicle', 'text'], ['score', 'Safety score (%)', 'number']],
+      row: function (v) { return '<tr><td><strong>' + escapeHtml(v.name) + '</strong><br><small>' + escapeHtml(v.email) + '</small></td><td>' + escapeHtml(v.licence) + '</td><td>' + escapeHtml(v.vehicle || 'Unassigned') + '</td><td><span class="badge badge-green">Available</span></td><td>' + escapeHtml(v.score) + '%</td></tr>'; }
+    },
+    maintenance: {
+      title: 'New Work Order', table: 'maintenance-records', storage: 'transitops-maintenance',
+      fields: [['id', 'Work order number', 'text'], ['vehicle', 'Vehicle registration', 'text'], ['service', 'Service required', 'text'], ['dueDate', 'Due date', 'date']],
+      row: function (v) { return '<tr><td><strong>' + escapeHtml(v.id) + '</strong></td><td>' + escapeHtml(v.vehicle) + '</td><td>' + escapeHtml(v.service) + '</td><td>' + new Date(v.dueDate + 'T00:00:00').toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' }) + '</td><td><span class="badge badge-blue">Scheduled</span></td></tr>'; }
+    }
+  };
+
+  function escapeHtml(value) {
+    return String(value || '').replace(/[&<>'"]/g, function (character) { return ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' })[character]; });
+  }
+
+  function appendSavedRecords(type) {
+    const config = recordConfig[type];
+    const table = document.getElementById(config.table);
+    if (!table) return;
+    try { JSON.parse(localStorage.getItem(config.storage) || '[]').forEach(function (record) { table.insertAdjacentHTML('beforeend', config.row(record)); }); } catch (error) { /* Ignore malformed demo storage. */ }
+  }
+
+  function openRecordForm(type) {
+    const config = recordConfig[type];
+    const overlay = document.createElement('div');
+    overlay.style.cssText = 'position:fixed;inset:0;z-index:10000;background:rgba(15,23,42,.45);display:grid;place-items:center;padding:20px;';
+    const fields = config.fields.map(function (field) { return '<label style="display:block;margin:0 0 14px;font:600 12px Inter,Arial,sans-serif;color:#334155;">' + field[1] + '<input required name="' + field[0] + '" type="' + field[2] + '" style="display:block;width:100%;margin-top:6px;padding:10px;border:1px solid #cbd5e1;border-radius:6px;font:14px Inter,Arial,sans-serif;"></label>'; }).join('');
+    overlay.innerHTML = '<form style="width:min(440px,100%);background:#fff;border-radius:10px;padding:24px;box-shadow:0 16px 40px rgba(0,0,0,.24);"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;"><h2 style="font:700 20px Inter,Arial,sans-serif;margin:0;color:#0f172a;">' + config.title + '</h2><button type="button" data-close style="border:0;background:none;font-size:22px;cursor:pointer;">×</button></div>' + fields + '<div style="display:flex;justify-content:flex-end;gap:10px;margin-top:20px;"><button type="button" data-close style="padding:9px 14px;border:1px solid #cbd5e1;background:#fff;border-radius:6px;cursor:pointer;">Cancel</button><button type="submit" style="padding:9px 14px;border:0;background:#0b57d0;color:#fff;border-radius:6px;font-weight:600;cursor:pointer;">Save</button></div></form>';
+    overlay.querySelectorAll('[data-close]').forEach(function (button) { button.onclick = function () { overlay.remove(); }; });
+    overlay.querySelector('form').onsubmit = function (event) {
+      event.preventDefault();
+      const data = Object.fromEntries(new FormData(event.currentTarget).entries());
+      const table = document.getElementById(config.table);
+      table.insertAdjacentHTML('beforeend', config.row(data));
+      const saved = JSON.parse(localStorage.getItem(config.storage) || '[]'); saved.push(data); localStorage.setItem(config.storage, JSON.stringify(saved));
+      overlay.remove(); notify(config.title.replace('Add ', '') + ' saved.');
+    };
+    document.body.appendChild(overlay);
+    overlay.querySelector('input').focus();
+  }
+
+  function setupRecordForms() {
+    Object.keys(recordConfig).forEach(appendSavedRecords);
+    document.querySelectorAll('[data-add-record]').forEach(function (button) { button.addEventListener('click', function () { openRecordForm(button.dataset.addRecord); }); });
+  }
+
   function setupLegacyFilters() {
     document.querySelectorAll('.input-field').forEach(function (field) {
       const text = labelFor(field);
@@ -158,6 +211,7 @@
 
   function setupPage() {
     setupNavigation();
+    setupRecordForms();
     setupLegacyFilters();
     addRelatedLinks();
     document.querySelectorAll('.search input, input[type="search"]').forEach(function (input) { input.addEventListener('input', function () { filterContent(input.value); }); });
