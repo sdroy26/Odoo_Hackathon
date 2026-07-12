@@ -209,7 +209,32 @@
     });
   }
 
+  function normalizeNavigation() {
+    const nav = document.querySelector('aside.sidebar nav.nav, aside.sidebar nav.sidebar-nav');
+    if (!nav) return;
+    const current = (window.location.pathname.split('/').pop() || 'dashboard.html').toLowerCase();
+    const activePages = {
+      'dashboard.html': 'Dashboard', 'registry.html': 'Vehicles', 'vehicle-registry.html': 'Vehicles', 'comparison.html': 'Vehicles',
+      'drivers.html': 'Drivers', 'trips.html': 'Trips', 'maintenance.html': 'Maintenance', 'fuel-expenses.html': 'Fuel/Expenses',
+      'reports.html': 'Reports', 'fleet-calendar.html': 'Calendar', 'fleet-documents.html': 'Documents', 'settings.html': 'Settings'
+    };
+    const items = [
+      ['Dashboard', 'dashboard.html', 'squares-four'], ['Vehicles', 'registry.html', 'truck'], ['Drivers', 'drivers.html', 'user'],
+      ['Trips', 'trips.html', 'git-merge'], ['Maintenance', 'maintenance.html', 'wrench'], ['Fuel/Expenses', 'fuel-expenses.html', 'gas-pump'],
+      ['Reports', 'reports.html', 'chart-bar'], ['Calendar', 'fleet-calendar.html', 'calendar-blank'], ['Documents', 'fleet-documents.html', 'file-text'], ['Settings', 'settings.html', 'gear']
+    ];
+    const materialIcons = ['dashboard', 'directions_car', 'person', 'route', 'build', 'local_gas_station', 'bar_chart', 'calendar_month', 'description', 'settings'];
+    const isMaterial = !!document.querySelector('link[href*="Material+Symbols"]');
+    const active = activePages[current];
+    nav.innerHTML = items.map(function (item, index) {
+      const icon = isMaterial ? '<span class="material-symbols-outlined">' + materialIcons[index] + '</span>' : '<i class="ph ph-' + item[2] + '"></i>';
+      return '<a href="' + item[1] + '" class="nav-item' + (item[0] === active ? ' active' : '') + '">' + icon + item[0] + '</a>';
+    }).join('');
+    document.querySelectorAll('aside.sidebar .sidebar-footer > a.nav-item[href="settings.html"]').forEach(function (link) { link.parentElement.remove(); });
+  }
+
   function setupPage() {
+    normalizeNavigation();
     setupNavigation();
     setupRecordForms();
     setupLegacyFilters();
