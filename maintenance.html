@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Maintenance - TransitOps</title>
+  <link rel="stylesheet" href="css/styles.css">
+  <script src="https://unpkg.com/@phosphor-icons/web"></script>
+</head>
+<body>
+  <aside class="sidebar">
+    <div class="logo"><div class="logo-icon"><i class="ph-fill ph-truck"></i></div><div class="logo-text"><h1>TransitOps</h1><p>Fleet Management</p></div></div>
+    <nav class="nav">
+      <a href="dashboard.html" class="nav-item"><i class="ph ph-squares-four"></i> Dashboard</a>
+      <a href="registry.html" class="nav-item"><i class="ph ph-truck"></i> Vehicles</a>
+      <a href="drivers.html" class="nav-item"><i class="ph ph-user"></i> Drivers</a>
+      <a href="trips.html" class="nav-item"><i class="ph ph-git-merge"></i> Trips</a>
+      <a href="maintenance.html" class="nav-item active"><i class="ph ph-wrench"></i> Maintenance</a>
+      <a href="fuel-expenses.html" class="nav-item"><i class="ph ph-gas-pump"></i> Fuel/Expenses</a>
+      <a href="reports.html" class="nav-item"><i class="ph ph-chart-bar"></i> Reports</a>
+      <a href="fleet-calendar.html" class="nav-item"><i class="ph ph-calendar-blank"></i> Calendar</a>
+      <a href="fleet-documents.html" class="nav-item"><i class="ph ph-file-text"></i> Documents</a>
+    </nav>
+    <div class="sidebar-footer"><a href="settings.html" class="nav-item"><i class="ph ph-gear"></i> Settings</a></div>
+  </aside>
+  <main class="main">
+    <header class="header"><div class="search"><i class="ph ph-magnifying-glass"></i><input type="search" placeholder="Search work orders..."></div><div class="header-actions"><button class="profile-btn"><img src="https://ui-avatars.com/api/?name=Admin+User&background=0D8ABC&color=fff" alt="Profile"></button></div></header>
+    <div class="content">
+      <div class="page-header"><div class="page-title"><h2>Maintenance Centre</h2><p>Track scheduled service, inspections, and open work orders.</p></div><button class="btn btn-primary"><i class="ph ph-plus"></i> New Work Order</button></div>
+      <div class="grid-4"><div class="card"><div class="card-title">Open Work Orders</div><div class="card-value">6</div></div><div class="card"><div class="card-title">Due This Week</div><div class="card-value">4</div></div><div class="card"><div class="card-title">Vehicles in Shop</div><div class="card-value">2</div></div><div class="card"><div class="card-title">Monthly Spend</div><div class="card-value">$8.4k</div></div></div>
+      <div class="table-container"><table><thead><tr><th>Work Order</th><th>Vehicle</th><th>Service</th><th>Due Date</th><th>Status</th></tr></thead><tbody><tr><td><strong>WO-4992</strong></td><td>TRK-8832</td><td>Brake inspection</td><td>Jul 13, 2026</td><td><span class="badge badge-red">Urgent</span></td></tr><tr><td><strong>WO-4998</strong></td><td>VAN-405</td><td>Oil and filter change</td><td>Jul 15, 2026</td><td><span class="badge badge-blue">Scheduled</span></td></tr><tr><td><strong>WO-5001</strong></td><td>SED-102</td><td>Tyre rotation</td><td>Jul 18, 2026</td><td><span class="badge badge-green">Approved</span></td></tr></tbody></table></div>
+    </div>
+  </main>
+  <script src="css/site.js"></script>
+</body>
+</html>

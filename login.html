@@ -281,7 +281,7 @@
     </form>
 
     <div class="card-footer">
-      <span>Need access? </span><a href="#" class="footer-link" onclick="triggerContactAdmin(event)">Contact your administrator</a>
+      <span>Demo: operator@transitops.com / Transit@123 &middot; </span><a href="#" class="footer-link" onclick="triggerContactAdmin(event)">Contact your administrator</a>
     </div>
   </div>
 
@@ -328,13 +328,31 @@
     function handleLogin(e) {
       e.preventDefault();
       
-      const email = document.getElementById("email").value;
-      
-      showToast("Verification successful! Logging in...", "success");
-      
-      setTimeout(() => {
-        window.location.href = "dashboard.html";
-      }, 1000);
+      const email = document.getElementById("email").value.trim().toLowerCase();
+      const password = document.getElementById("password").value;
+
+      fetch("users.csv")
+        .then((response) => {
+          if (!response.ok) throw new Error("Unable to load credentials");
+          return response.text();
+        })
+        .then((csv) => {
+          const users = csv.trim().split(/\r?\n/).slice(1).map((line) => {
+            const [userEmail, userPassword, name, role] = line.split(",");
+            return { email: userEmail.trim().toLowerCase(), password: userPassword.trim(), name, role };
+          });
+          const user = users.find((item) => item.email === email && item.password === password);
+          if (!user) throw new Error("Incorrect email address or password.");
+          sessionStorage.setItem("transitopsUser", JSON.stringify({ name: user.name, role: user.role, email: user.email }));
+          showToast("Verification successful! Logging in...", "success");
+          setTimeout(() => { window.location.href = "dashboard.html"; }, 700);
+        })
+        .catch((error) => {
+          const message = error.message === "Failed to fetch"
+            ? "Open the project through a local web server so users.csv can be checked."
+            : error.message;
+          showToast(message, "error");
+        });
     }
 
     // --- FORGOT PASS ---

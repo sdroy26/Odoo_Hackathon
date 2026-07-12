@@ -4,8 +4,10 @@
 
   const pages = {
     'dashboard': 'dashboard.html',
-    'vehicles': 'vehicle-registry.html',
+    'vehicles': 'registry.html',
+    'drivers': 'drivers.html',
     'trips': 'trips.html',
+    'maintenance': 'maintenance.html',
     'fuel/expenses': 'fuel-expenses.html',
     'reports': 'reports.html',
     'calendar': 'fleet-calendar.html',
@@ -123,7 +125,7 @@
     const links = document.createElement('nav');
     links.setAttribute('aria-label', 'Additional views');
     links.style.cssText = 'position:fixed;right:16px;bottom:14px;z-index:900;display:flex;gap:10px;background:#fff;border:1px solid #dbe2ea;border-radius:999px;padding:7px 12px;box-shadow:0 4px 12px rgba(15,23,42,.10);font:600 12px Inter,Arial,sans-serif;';
-    links.innerHTML = '<a href="registry.html" style="color:#0b57d0;text-decoration:none;">Classic Registry</a><a href="comparison.html" style="color:#0b57d0;text-decoration:none;">Compare Vehicles</a>';
+    links.innerHTML = '<a href="registry.html" style="color:#0b57d0;text-decoration:none;">Vehicle Registry</a><a href="vehicle-registry.html" style="color:#0b57d0;text-decoration:none;">Vehicle Details</a><a href="comparison.html" style="color:#0b57d0;text-decoration:none;">Compare Vehicles</a>';
     document.body.appendChild(links);
   }
 

@@ -1,0 +1,4 @@
+email,password,name,role
+operator@transitops.com,Transit@123,Admin User,Fleet Manager
+dispatcher@transitops.com,Dispatch@123,Avery Patel,Dispatcher
+analyst@transitops.com,Report@123,Jordan Lee,Analyst
